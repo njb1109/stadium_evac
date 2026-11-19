@@ -1,0 +1,1 @@
+- Set up the top-level project layout and numbered folders. Created README.md files for 00_planning, 01_data, 02_validation, and 03_output, and documented the layout and file-placement rule in AGENTS.md. It worked.
