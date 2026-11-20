@@ -17,7 +17,7 @@ A planning and training app for facilities managers, building operators, event s
 ## Inputs - every value the user enters, with units, ranges, defaults, and the control used to enter it
 - Occupancy: user-entered current occupant count for the Marriott Center, from 100 to 2000 whole people, with a default of 500 people. Use a number entry and slider. Values outside the range are clamped to the nearest limit.
 - Door availability: preset scenario dropdown controlling whether doors are open. Options are all doors available, exit doors only, and individual selections for the north, south, east, and west groups of doors. Presets update only the named groups and retain other selections. Exit doors means every designated exterior exit door. The default preset is all doors available.
-- Obstacles: dropdown for one fixed obstacle scenario: no additional obstacles, rows of seats, aisle restrictions, or stairway/level restrictions. Selecting an obstacle replaces the previous obstacle scenario; there is no severity control. The default obstacle selection is aisle restrictions, and it reduces walking speed and usable aisle capacity while also blocking selected routes to exits. Other obstacle scenarios affect the same walking and route rules according to their type.
+- Obstacles: click-open multi-select dropdown for no additional obstacles, rows of seats, aisle restrictions, and stairway/level restrictions. “No additional obstacles” is exclusive and selecting it clears all restrictions. Any combination of the three restriction scenarios may be selected at once, with no severity control. The default selection is no additional obstacles. When combined, each selected restriction applies its walking, aisle, capacity, or route rule concurrently.
 - Walking time: derived from the fixed Marriott Center floor plan; no separate walking-time input is provided.
 - Occupant placement: occupants are spread randomly across the floor plan. Each occupant moves toward the nearest open exit door that is reachable from its floor-plan position.
 
@@ -132,7 +132,7 @@ A planning and training app for facilities managers, building operators, event s
 - User editing of the floor plan, exit locations, routes, or representative door width.
 - Configurable walking speed or route-distance entry; both remain fixed or derived from the floor plan.
 - Door width or walking-speed inputs for individual users or groups.
-- Multiple simultaneous obstacle scenarios or obstacle severity controls.
+- Obstacle severity controls and custom obstacle types. Combined modeled obstacle scenarios are supported.
 - Custom obstacle types or custom route-blocking rules.
 - Scenario comparison, optimization, or recommendations for which scenario is safest.
 - Accessibility-specific evacuation cases or accessibility requirements, including mobility assistance and accessibility routes.
@@ -162,7 +162,7 @@ Build controls and client-side state.
 
 - Add the occupancy number field and slider for 100-2000 people.
 - Add the door preset control and north/south/east/west groups.
-- Add the fixed obstacle dropdown and reset behavior.
+- Add the multi-select obstacle dropdown and reset behavior. Allow no additional obstacles or any combination of aisle restrictions, rows of seats, and stairway/level restrictions.
 - Add Calculate and loading/error states.
 - Keep control markup and behavior in top-level `index.html`.
 

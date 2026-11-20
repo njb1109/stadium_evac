@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stadium Evacuation</title>
+  <style>
+    :root {
+      --light: #dceaf2;
+      --grey-50: #f7f8f9;
+      --grey-100: #edf0f2;
+      --grey-200: #dfe4e7;
+      --grey-400: #a8b0b5;
+      --grey-600: #667178;
+      --grey-800: #2f383d;
+      --ink: #1d2529;
+      --white: #ffffff;
+      --danger: #a62d33;
+      --success: #2f6f4e;
+      --shadow: 0 4px 14px rgb(47 56 61 / 12%);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--grey-50);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button, input, select {
+      min-height: 44px;
+    }
+
+    :focus-visible {
+      outline: 3px solid #1d4e68;
+      outline-offset: 2px;
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 68px;
+      padding: 12px 20px;
+      background: var(--white);
+      border-bottom: 1px solid var(--grey-200);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--light);
+      color: var(--grey-800);
+      font-weight: 800;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      margin-bottom: 0;
+      font-size: 1.25rem;
+    }
+
+    .status {
+      color: var(--grey-600);
+      font-size: 0.875rem;
+    }
+
+    body > input[type="radio"] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .tab-controls {
+      display: none;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(220px, 260px) minmax(430px, 1.65fr) minmax(280px, 360px);
+      gap: 16px;
+      min-height: calc(100vh - 68px);
+      padding: 16px;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid rgb(223 228 231 / 70%);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .inputs-card,
+    .floor-card,
+    .outputs-card {
+      min-width: 0;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 56px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--grey-200);
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .collapse-button {
+      width: 44px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--grey-600);
+    }
+
+    .collapse-button:hover {
+      box-shadow: 0 2px 8px rgb(47 56 61 / 12%);
+      background: var(--grey-50);
+    }
+
+    .inputs-body,
+    .outputs-body {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label,
+    .field legend {
+      font-size: 0.875rem;
+      font-weight: 700;
+    }
+
+    .help {
+      color: var(--grey-600);
+      font-size: 0.78rem;
+    }
+
+    .field select,
+    .field input[type="number"] {
+      width: 100%;
+      border: 1px solid var(--grey-400);
+      border-radius: 6px;
+      padding: 8px 10px;
+      background: var(--white);
+      color: var(--ink);
+    }
+
+    .occupancy-row {
+      display: grid;
+      grid-template-columns: 1fr 86px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #789baa;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .primary,
+    .secondary {
+      min-height: 44px;
+      border-radius: 6px;
+      padding: 8px 14px;
+      cursor: default;
+    }
+
+    .primary {
+      border: 1px solid #789baa;
+      background: var(--light);
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .secondary {
+      border: 1px solid var(--grey-400);
+      background: var(--white);
+      color: var(--grey-800);
+    }
+
+    .primary:hover,
+    .secondary:hover {
+      box-shadow: 0 3px 10px rgb(47 56 61 / 14%);
+    }
+
+    .floor-body {
+      min-height: 620px;
+      padding: 12px;
+    }
+
+    .floor-plan {
+      width: 100%;
+      height: 100%;
+      min-height: 596px;
+      border: 1px solid var(--grey-200);
+      border-radius: 8px;
+      background: var(--grey-50);
+    }
+
+    .floor-plan text {
+      fill: var(--grey-600);
+      font-size: 12px;
+    }
+
+    .seat {
+      fill: #dfe7eb;
+      stroke: #b8c4c9;
+    }
+
+    .aisle {
+      fill: #f2f4f5;
+      stroke: #cbd3d7;
+    }
+
+    .exit-marker {
+      fill: #f7f9fa;
+      stroke: var(--grey-600);
+      stroke-width: 3;
+    }
+
+    .exit-label {
+      font-weight: 400;
+      font-size: 12px;
+      fill: var(--grey-800);
+    }
+
+    .occupant {
+      fill: #789baa;
+      stroke: var(--white);
+      stroke-width: 1;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .result {
+      padding: 12px 8px;
+      border: 1px solid var(--grey-200);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .result strong {
+      display: block;
+      font-size: clamp(1.15rem, 2vw, 1.55rem);
+      letter-spacing: 0.02em;
+    }
+
+    .result span {
+      color: var(--grey-600);
+      font-size: 0.72rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .summary {
+      padding: 10px 8px;
+      border-radius: 8px;
+      background: var(--grey-100);
+      text-align: center;
+    }
+
+    .summary strong {
+      display: block;
+      font-size: 1.05rem;
+    }
+
+    .summary span {
+      color: var(--grey-600);
+      font-size: 0.72rem;
+    }
+
+    .chart-card {
+      border: 1px solid var(--grey-200);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .chart-card h3 {
+      margin-bottom: 8px;
+      font-size: 0.875rem;
+    }
+
+    .chart {
+      width: 100%;
+      min-height: 220px;
+      border-radius: 6px;
+      background: var(--grey-50);
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+      margin-top: 8px;
+      color: var(--grey-600);
+      font-size: 0.78rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-line {
+      width: 18px;
+      border-top: 3px solid #789baa;
+    }
+
+    .legend-line.remaining {
+      border-top-style: dashed;
+      border-top-color: var(--grey-600);
+    }
+
+    .animation-controls {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .animation-controls button,
+    .animation-controls select,
+    .animation-controls input {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--grey-400);
+      border-radius: 6px;
+      background: var(--white);
+      padding: 7px 8px;
+    }
+
+    .timeline {
+      grid-column: 1 / -1;
+    }
+
+    .custom-door-wrap {
+      position: relative;
+    }
+
+    .door-menu {
+      position: relative;
+    }
+
+    .door-menu-trigger {
+      width: 100%;
+      border: 1px solid var(--grey-400);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--ink);
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    .door-menu-list {
+      display: none;
+      position: absolute;
+      z-index: 20;
+      left: 0;
+      right: 0;
+      top: calc(100% + 6px);
+      padding: 6px;
+      border: 1px solid var(--grey-400);
+      border-radius: 6px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .door-menu.open .door-menu-list {
+      display: grid;
+    }
+
+    .door-option,
+    .custom-door-trigger {
+      min-height: 44px;
+      width: 100%;
+      border: 0;
+      border-radius: 5px;
+      background: var(--white);
+      color: var(--ink);
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    .door-option:hover,
+    .custom-door-trigger:hover,
+    .custom-door-trigger:focus {
+      background: var(--grey-100);
+    }
+
+    .custom-door-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .custom-door-panel {
+      display: none;
+      position: absolute;
+      z-index: 30;
+      left: calc(100% + 6px);
+      top: 0;
+      width: 180px;
+      padding: 8px;
+      border: 1px solid var(--grey-400);
+      border-radius: 6px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .custom-door-wrap {
+      position: static;
+    }
+
+    .custom-door-wrap.open .custom-door-panel {
+      display: grid;
+    }
+
+    .custom-door-panel label {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 5px;
+      padding: 6px 8px;
+    }
+
+    .custom-door-panel label:hover {
+      background: var(--grey-100);
+    }
+
+    .status-message {
+      min-height: 20px;
+      color: var(--grey-600);
+      font-size: 0.78rem;
+    }
+
+    .status-message.error {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .status-message.success {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .primary:disabled,
+    .animation-controls button:disabled,
+    .animation-controls select:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .results-dimmed {
+      opacity: 0.45;
+    }
+
+    .exit-group.closed .exit-marker {
+      fill: var(--grey-200);
+      stroke: var(--danger);
+    }
+
+    .progress-readout {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 6px;
+    }
+
+    .progress-track {
+      position: relative;
+      height: 12px;
+      overflow: hidden;
+      border: 1px solid var(--grey-400);
+      border-radius: 999px;
+      background: var(--grey-100);
+    }
+
+    .progress-fill {
+      width: 25%;
+      height: 100%;
+      background: #789baa;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      color: var(--grey-600);
+      font-size: 0.72rem;
+    }
+
+    .obstacle-menu {
+      position: relative;
+    }
+
+    .obstacle-menu-trigger,
+    .obstacle-menu-list {
+      width: 100%;
+      border: 1px solid var(--grey-400);
+      border-radius: 6px;
+      background: var(--white);
+    }
+
+    .obstacle-menu-trigger {
+      min-height: 44px;
+      color: var(--ink);
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    .obstacle-menu-list {
+      display: none;
+      position: absolute;
+      z-index: 15;
+      left: 0;
+      top: calc(100% + 6px);
+      padding: 6px;
+      box-shadow: var(--shadow);
+    }
+
+    .obstacle-menu.open .obstacle-menu-list {
+      display: grid;
+    }
+
+    .obstacle-menu-list label {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 5px;
+      padding: 6px 8px;
+    }
+
+    .obstacle-menu-list label:hover {
+      background: var(--grey-100);
+    }
+
+    @media (max-width: 980px) {
+      .workspace {
+        grid-template-columns: 220px minmax(380px, 1fr);
+      }
+
+      .outputs-card {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app-header {
+        min-height: 58px;
+        padding: 8px 12px;
+      }
+
+      .status { display: none; }
+
+      .tab-controls {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background: var(--white);
+        border-bottom: 1px solid var(--grey-200);
+      }
+
+      .tab-controls input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .tab-controls label {
+        min-height: 48px;
+        display: grid;
+        place-items: center;
+        border-bottom: 3px solid transparent;
+        color: var(--grey-600);
+        font-size: 0.78rem;
+        cursor: default;
+      }
+
+      #tab-inputs:checked ~ .tab-controls label[for="tab-inputs"],
+      #tab-floor:checked ~ .tab-controls label[for="tab-floor"],
+      #tab-chart:checked ~ .tab-controls label[for="tab-chart"],
+      #tab-stats:checked ~ .tab-controls label[for="tab-stats"] {
+        border-bottom-color: #789baa;
+        color: var(--ink);
+        font-weight: 800;
+      }
+
+      .workspace {
+        display: block;
+        min-height: auto;
+        padding: 10px;
+      }
+
+      #tab-inputs:checked ~ .workspace .inputs-card,
+      #tab-floor:checked ~ .workspace .floor-card,
+      #tab-chart:checked ~ .workspace .outputs-card,
+      #tab-stats:checked ~ .workspace .outputs-card {
+        display: block;
+      }
+
+      #tab-inputs:checked ~ .workspace .floor-card,
+      #tab-inputs:checked ~ .workspace .outputs-card,
+      #tab-floor:checked ~ .workspace .inputs-card,
+      #tab-floor:checked ~ .workspace .outputs-card,
+      #tab-chart:checked ~ .workspace .inputs-card,
+      #tab-chart:checked ~ .workspace .floor-card,
+      #tab-stats:checked ~ .workspace .inputs-card,
+      #tab-stats:checked ~ .workspace .floor-card {
+        display: none;
+      }
+
+      .card {
+        box-shadow: none;
+        border: 0;
+      }
+
+      .floor-body {
+        min-height: 520px;
+      }
+
+      .floor-plan {
+        min-height: 496px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">ME</div>
+      <h1>Stadium Evacuation</h1>
+    </div>
+    <div class="status">Marriott Center planning model</div>
+  </header>
+
+  <input id="tab-inputs" type="radio" name="mobile-tab" checked>
+  <input id="tab-floor" type="radio" name="mobile-tab">
+  <input id="tab-chart" type="radio" name="mobile-tab">
+  <input id="tab-stats" type="radio" name="mobile-tab">
+
+  <nav class="tab-controls" aria-label="Mobile sections">
+    <label for="tab-inputs">Inputs</label>
+    <label for="tab-floor">Floor Plan</label>
+    <label for="tab-chart">Chart</label>
+    <label for="tab-stats">Statistics</label>
+  </nav>
+
+  <main class="workspace">
+    <section class="card inputs-card" aria-labelledby="inputs-title">
+      <div class="card-header">
+        <h2 id="inputs-title">Scenario inputs</h2>
+        <button class="collapse-button" type="button" aria-label="Collapse scenario inputs" title="Collapse panel">−</button>
+      </div>
+      <div class="inputs-body">
+        <div class="field">
+          <label for="occupancy">Occupancy</label>
+          <div class="occupancy-row">
+            <input id="occupancy-range" type="range" min="100" max="2000" value="500" aria-label="Occupancy slider">
+            <input id="occupancy" type="number" min="100" max="2000" value="500" aria-describedby="occupancy-help">
+          </div>
+          <span id="occupancy-help" class="help">100–2000 people</span>
+        </div>
+
+        <div class="field">
+          <label for="door-preset">Door availability</label>
+          <div class="door-menu" id="door-preset">
+            <button class="door-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+              All doors available <span aria-hidden="true">▾</span>
+            </button>
+            <div class="door-menu-list" role="menu">
+              <button class="door-option" type="button" role="menuitem">All doors available</button>
+              <button class="door-option" type="button" role="menuitem">Exit doors only</button>
+              <div class="custom-door-wrap">
+                <button class="custom-door-trigger" type="button" aria-haspopup="true">
+                  <span>Custom door selection</span><span aria-hidden="true">→</span>
+                </button>
+                <div class="custom-door-panel" role="group" aria-label="Choose exit door groups">
+                  <label><input type="checkbox" checked> North</label>
+                  <label><input type="checkbox" checked> South</label>
+                  <label><input type="checkbox" checked> East</label>
+                  <label><input type="checkbox" checked> West</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="help">Choose open groups of exit doors</span>
+        </div>
+
+        <div class="field">
+          <label for="obstacles">Obstacle scenario</label>
+          <div class="obstacle-menu" id="obstacles">
+            <button class="obstacle-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+              No additional obstacles <span aria-hidden="true">▾</span>
+            </button>
+            <div class="obstacle-menu-list" role="group" aria-label="Obstacle scenarios">
+              <label><input type="checkbox" value="none" checked> No additional obstacles</label>
+              <label><input type="checkbox" value="aisle"> Aisle restrictions</label>
+              <label><input type="checkbox" value="seats"> Rows of seats</label>
+              <label><input type="checkbox" value="stair"> Stairway/level restrictions</label>
+            </div>
+          </div>
+          <span class="help">Choose one or combine any applicable restrictions</span>
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="calculate-button" type="button">Calculate</button>
+          <button class="secondary" id="reset-button" type="button">Reset</button>
+          <p class="status-message" id="input-status" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card floor-card" aria-labelledby="floor-title">
+      <div class="card-header">
+        <h2 id="floor-title">Marriott Center floor plan</h2>
+        <button class="collapse-button" type="button" aria-label="Collapse floor plan" title="Collapse panel">−</button>
+      </div>
+      <div class="floor-body">
+        <svg class="floor-plan" viewBox="0 0 760 560" role="img" aria-label="Marriott Center floor plan with rounded outline, central court, blue seating sections, aisles, perimeter hallway, and corner exits">
+          <path d="M110 46 H650 C702 46 730 88 730 145 V415 C730 472 702 514 650 514 H110 C58 514 30 472 30 415 V145 C30 88 58 46 110 46 Z"
+            fill="#f7f9fa" stroke="#8e989d" stroke-width="8"/>
+
+          <!-- Thick hallway around the outside of the seating bowl -->
+          <path d="M98 70 H662 C690 70 706 98 706 145 V415 C706 462 690 490 662 490 H98 C70 490 54 462 54 415 V145 C54 98 70 70 98 70 Z"
+            fill="none" stroke="#d3d9dd" stroke-width="24"/>
+
+          <!-- Central basketball court -->
+          <rect x="292" y="206" width="176" height="148" rx="12" fill="#f7f1df" stroke="#c8b86f" stroke-width="3"/>
+          <rect x="318" y="224" width="124" height="112" rx="6" fill="#dbe7ec" stroke="#a8b0b5"/>
+          <path d="M380 224 V336 M318 280 H442" stroke="#b7c3c8" stroke-width="3"/>
+          <text x="380" y="288" text-anchor="middle" class="exit-label" fill="#667178">COURT</text>
+
+          <!-- Top seating sections -->
+          <g fill="#1f69bd" stroke="#f7f9fa" stroke-width="4">
+            <path d="M160 86 H286 L274 182 H176 Z"/>
+            <path d="M302 86 H458 L444 182 H316 Z"/>
+            <path d="M474 86 H600 L584 182 H486 Z"/>
+          </g>
+
+          <!-- Bottom seating sections -->
+          <g fill="#1f69bd" stroke="#f7f9fa" stroke-width="4">
+            <path d="M176 378 H274 L286 474 H160 Z"/>
+            <path d="M316 378 H444 L458 474 H302 Z"/>
+            <path d="M486 378 H584 L600 474 H474 Z"/>
+          </g>
+
+          <!-- Left and right seating sections -->
+          <g fill="#1f69bd" stroke="#f7f9fa" stroke-width="4">
+            <path d="M70 150 V238 L174 246 L164 178 Z"/>
+            <path d="M70 254 V342 L164 334 L174 264 Z"/>
+            <path d="M70 358 V410 L160 410 L174 352 Z"/>
+          </g>
+          <g fill="#1f69bd" stroke="#f7f9fa" stroke-width="4">
+            <path d="M690 150 V238 L586 246 L596 178 Z"/>
+            <path d="M690 254 V342 L596 334 L586 264 Z"/>
+            <path d="M690 358 V410 L600 410 L586 352 Z"/>
+          </g>
+
+          <!-- Corner seating blocks -->
+          <g fill="#1f69bd" stroke="#f7f9fa" stroke-width="4">
+            <path d="M70 150 C82 112 112 86 160 86 L176 178 L70 238 Z"/>
+            <path d="M690 150 C678 112 648 86 600 86 L584 178 L690 238 Z"/>
+            <path d="M70 410 C82 448 112 474 160 474 L176 382 L70 358 Z"/>
+            <path d="M690 410 C678 448 648 474 600 474 L584 382 L690 358 Z"/>
+          </g>
+
+          <!-- Several white aisles within each blue seating section -->
+          <g fill="none" stroke="#f7f9fa" stroke-width="5">
+            <path d="M190 92 V176 M220 88 V178 M250 86 V180"/>
+            <path d="M322 92 V176 M350 88 V180 M378 86 V182 M406 88 V180 M434 92 V176"/>
+            <path d="M510 92 V176 M540 88 V178 M570 86 V180"/>
+            <path d="M190 384 V468 M220 382 V472 M250 380 V474"/>
+            <path d="M322 384 V468 M350 380 V472 M378 378 V474 M406 380 V472 M434 384 V468"/>
+            <path d="M510 384 V468 M540 382 V472 M570 380 V474"/>
+            <path d="M78 158 H168 M76 210 H172 M74 262 H174 M74 314 H174 M76 366 H168"/>
+            <path d="M682 158 H592 M684 210 H588 M686 262 H586 M686 314 H586 M684 366 H592"/>
+          </g>
+
+          <!-- Aisle bands leading from the center court to the perimeter hallway -->
+          <g fill="#f7f9fa" stroke="#d3d9dd" stroke-width="3">
+            <path d="M292 206 L176 178 L164 246 Z"/>
+            <path d="M468 206 L584 178 L596 246 Z"/>
+            <path d="M292 354 L176 382 L164 334 Z"/>
+            <path d="M468 354 L584 382 L596 334 Z"/>
+            <path d="M302 206 L302 86 H458 L458 206 Z"/>
+            <path d="M302 354 L302 474 H458 L458 354 Z"/>
+          </g>
+
+          <g fill="#f7f9fa" stroke="#667178" stroke-width="3">
+            <g class="exit-group" data-direction="north" transform="translate(380 70)">
+              <rect x="-36" y="-14" width="72" height="28" rx="6"/>
+              <text x="0" y="5" text-anchor="middle" class="exit-label">North</text>
+            </g>
+            <g class="exit-group" data-direction="south" transform="translate(380 490)">
+              <rect x="-36" y="-14" width="72" height="28" rx="6"/>
+              <text x="0" y="5" text-anchor="middle" class="exit-label">South</text>
+            </g>
+            <g class="exit-group" data-direction="west" transform="translate(80 280)">
+              <rect x="-36" y="-14" width="72" height="28" rx="6"/>
+              <text x="0" y="5" text-anchor="middle" class="exit-label">West</text>
+            </g>
+            <g class="exit-group" data-direction="east" transform="translate(680 280)">
+              <rect x="-36" y="-14" width="72" height="28" rx="6"/>
+              <text x="0" y="5" text-anchor="middle" class="exit-label">East</text>
+            </g>
+          </g>
+
+          <g aria-label="Occupant dots">
+            <circle class="occupant" cx="200" cy="130" r="5"/>
+            <circle class="occupant" cx="330" cy="130" r="5"/>
+            <circle class="occupant" cx="430" cy="130" r="5"/>
+            <circle class="occupant" cx="530" cy="130" r="5"/>
+            <circle class="occupant" cx="200" cy="430" r="5"/>
+            <circle class="occupant" cx="330" cy="430" r="5"/>
+            <circle class="occupant" cx="430" cy="430" r="5"/>
+            <circle class="occupant" cx="530" cy="430" r="5"/>
+            <circle class="occupant" cx="120" cy="220" r="5"/>
+            <circle class="occupant" cx="120" cy="340" r="5"/>
+            <circle class="occupant" cx="640" cy="220" r="5"/>
+            <circle class="occupant" cx="640" cy="340" r="5"/>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="card outputs-card" aria-labelledby="outputs-title">
+      <div class="card-header">
+        <h2 id="outputs-title">Evacuation results</h2>
+        <button class="collapse-button" type="button" aria-label="Collapse evacuation results" title="Collapse panel">−</button>
+      </div>
+      <div class="outputs-body">
+        <div class="result-grid" aria-label="Evacuation times">
+          <div class="result"><strong>--:--</strong><span>Total</span></div>
+          <div class="result"><strong>--:--</strong><span>50% evacuated</span></div>
+          <div class="result"><strong>--:--</strong><span>90% evacuated</span></div>
+        </div>
+
+        <div class="summary-grid" aria-label="Evacuation summary">
+          <div class="summary"><strong>4</strong><span>Open exits</span></div>
+          <div class="summary"><strong>576</strong><span>People/minute</span></div>
+          <div class="summary"><strong>--</strong><span>Peak people/minute</span></div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Evacuation progress</h3>
+          <svg class="chart" viewBox="0 0 340 220" role="img" aria-label="Placeholder cumulative evacuation progress chart">
+            <g stroke="#dfe4e7" stroke-width="1">
+              <line x1="48" y1="30" x2="48" y2="180"/>
+              <line x1="48" y1="180" x2="320" y2="180"/>
+              <line x1="48" y1="143" x2="320" y2="143"/>
+              <line x1="48" y1="105" x2="320" y2="105"/>
+              <line x1="48" y1="68" x2="320" y2="68"/>
+              <line x1="48" y1="30" x2="320" y2="30"/>
+              <line x1="116" y1="30" x2="116" y2="180"/>
+              <line x1="184" y1="30" x2="184" y2="180"/>
+              <line x1="252" y1="30" x2="252" y2="180"/>
+              <line x1="320" y1="30" x2="320" y2="180"/>
+            </g>
+            <polyline points="48,180 116,143 184,105 252,68 320,30" fill="none" stroke="#789baa" stroke-width="4"/>
+            <polyline points="48,30 116,68 184,105 252,143 320,180" fill="none" stroke="#667178" stroke-width="3" stroke-dasharray="7 7"/>
+            <text x="48" y="198" fill="#667178" font-size="11">0</text>
+            <text x="112" y="198" fill="#667178" font-size="11">1</text>
+            <text x="180" y="198" fill="#667178" font-size="11">2</text>
+            <text x="248" y="198" fill="#667178" font-size="11">3</text>
+            <text x="310" y="198" fill="#667178" font-size="11">4 min</text>
+            <text x="12" y="24" fill="#667178" font-size="11">People</text>
+          </svg>
+          <div class="legend" aria-label="Chart legend">
+            <div class="legend-item"><span class="legend-line"></span>Evacuated</div>
+            <div class="legend-item"><span class="legend-line remaining"></span>Remaining</div>
+          </div>
+        </div>
+
+        <div class="animation-controls" aria-label="Animation controls">
+          <button type="button">Play</button>
+          <button type="button">Pause</button>
+          <button type="button">Reset</button>
+          <select aria-label="Animation speed">
+            <option>5x</option>
+            <option>10x</option>
+            <option>20x</option>
+          </select>
+          <div class="progress-readout" aria-label="Evacuation progress">
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="25" aria-label="25 percent evacuated">
+              <div class="progress-fill"></div>
+            </div>
+            <div class="progress-labels" aria-hidden="true">
+              <span>0%</span>
+              <span>25%</span>
+              <span>50%</span>
+              <span>75%</span>
+              <span>100%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const doorMenu = document.querySelector(".door-menu");
+    const doorMenuTrigger = doorMenu.querySelector(".door-menu-trigger");
+    const doorOptions = doorMenu.querySelectorAll(".door-option");
+    const customDoorWrap = doorMenu.querySelector(".custom-door-wrap");
+    const customDoorTrigger = doorMenu.querySelector(".custom-door-trigger");
+    const customDoorPanel = doorMenu.querySelector(".custom-door-panel");
+    const customDoorCheckboxes = customDoorPanel.querySelectorAll('input[type="checkbox"]');
+    const occupancyNumber = document.querySelector("#occupancy");
+    const occupancyRange = document.querySelector("#occupancy-range");
+    const obstacleMenu = document.querySelector(".obstacle-menu");
+    const obstacleMenuTrigger = obstacleMenu.querySelector(".obstacle-menu-trigger");
+    const obstacleCheckboxes = obstacleMenu.querySelectorAll('input[type="checkbox"]');
+    const calculateButton = document.querySelector("#calculate-button");
+    const resetButton = document.querySelector("#reset-button");
+    const inputStatus = document.querySelector("#input-status");
+    const outputsCard = document.querySelector(".outputs-card");
+    const animationButtons = document.querySelectorAll(".animation-controls button, .animation-controls select");
+    const exitGroups = document.querySelectorAll(".exit-group");
+
+    let openExitDirections = new Set(["north", "south", "east", "west"]);
+
+    function updateObstacleSelection(changedCheckbox) {
+      if (changedCheckbox && changedCheckbox.value === "none" && changedCheckbox.checked) {
+        obstacleCheckboxes.forEach((checkbox) => {
+          if (checkbox.value !== "none") checkbox.checked = false;
+        });
+      } else if (changedCheckbox && changedCheckbox.value !== "none" && changedCheckbox.checked) {
+        const noneCheckbox = obstacleMenu.querySelector('input[value="none"]');
+        noneCheckbox.checked = false;
+      }
+
+      const selected = [];
+      obstacleCheckboxes.forEach((checkbox) => {
+        if (checkbox.checked) {
+          selected.push(checkbox.value === "none"
+            ? "No additional obstacles"
+            : checkbox.parentElement.textContent.trim());
+        }
+      });
+
+      if (selected.length === 0) {
+        obstacleMenu.querySelector('input[value="none"]').checked = true;
+        selected.push("No additional obstacles");
+      }
+
+      obstacleMenuTrigger.firstChild.textContent =
+        selected.length === 1 ? `${selected[0]} ` : "Combined obstacles ";
+      setStatus(selected.length === 1
+        ? selected[0]
+        : `Combined: ${selected.join(", ")}`);
+    }
+
+    function setStatus(message = "", type = "") {
+      inputStatus.textContent = message;
+      inputStatus.className = `status-message${type ? ` ${type}` : ""}`;
+    }
+
+    function clampOccupancy(value) {
+      const numericValue = Number(value);
+      if (!Number.isFinite(numericValue)) return 500;
+      return Math.min(2000, Math.max(100, Math.round(numericValue)));
+    }
+
+    function syncOccupancy(value) {
+      const clamped = clampOccupancy(value);
+      occupancyNumber.value = String(clamped);
+      occupancyRange.value = String(clamped);
+      return clamped;
+    }
+
+    function setOpenExits(directions) {
+      openExitDirections = new Set(directions);
+      exitGroups.forEach((group) => {
+        group.classList.toggle("closed", !openExitDirections.has(group.dataset.direction));
+      });
+
+      const noExits = openExitDirections.size === 0;
+      calculateButton.disabled = noExits;
+      animationButtons.forEach((control) => {
+        control.disabled = noExits;
+      });
+
+      if (noExits) {
+        setStatus("No exit doors are open. Open at least one exit group to calculate.", "error");
+      } else {
+        setStatus(`${openExitDirections.size} exit group${openExitDirections.size === 1 ? "" : "s"} open.`);
+      }
+    }
+
+    function updateCustomDoorSelection() {
+      const selected = [];
+      customDoorCheckboxes.forEach((checkbox) => {
+        if (checkbox.checked) selected.push(checkbox.parentElement.textContent.trim());
+      });
+      setOpenExits(selected.map((label) => label.toLowerCase()));
+      doorMenuTrigger.firstChild.textContent = "Custom selection ";
+    }
+
+    setOpenExits(["north", "south", "east", "west"]);
+
+    doorMenuTrigger.addEventListener("click", () => {
+      const isOpen = doorMenu.classList.toggle("open");
+      doorMenuTrigger.setAttribute("aria-expanded", String(isOpen));
+      if (!isOpen) {
+        customDoorWrap.classList.remove("open");
+      }
+    });
+
+    doorOptions.forEach((option) => {
+      option.addEventListener("click", () => {
+        doorMenuTrigger.firstChild.textContent = `${option.textContent} `;
+        if (option.textContent === "All doors available") {
+          customDoorCheckboxes.forEach((checkbox) => { checkbox.checked = true; });
+          setOpenExits(["north", "south", "east", "west"]);
+        } else if (option.textContent === "Exit doors only") {
+          customDoorCheckboxes.forEach((checkbox) => { checkbox.checked = true; });
+          setOpenExits(["north", "south", "east", "west"]);
+        }
+        doorMenu.classList.remove("open");
+        doorMenuTrigger.setAttribute("aria-expanded", "false");
+        customDoorWrap.classList.remove("open");
+      });
+    });
+
+    customDoorTrigger.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const isOpen = customDoorWrap.classList.toggle("open");
+      customDoorTrigger.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    customDoorCheckboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        updateCustomDoorSelection();
+      });
+    });
+
+    occupancyNumber.addEventListener("input", () => {
+      if (occupancyNumber.value !== "") {
+        occupancyRange.value = String(clampOccupancy(occupancyNumber.value));
+      }
+    });
+
+    occupancyNumber.addEventListener("change", () => {
+      const rawValue = occupancyNumber.value;
+      const clamped = syncOccupancy(rawValue);
+      if (rawValue !== "" && Number(rawValue) !== clamped) {
+        setStatus(`Occupancy adjusted to ${clamped} people.`);
+      }
+    });
+
+    occupancyRange.addEventListener("input", () => {
+      syncOccupancy(occupancyRange.value);
+    });
+
+    obstacleMenuTrigger.addEventListener("click", () => {
+      const isOpen = obstacleMenu.classList.toggle("open");
+      obstacleMenuTrigger.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    obstacleCheckboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        updateObstacleSelection(checkbox);
+      });
+    });
+
+    updateObstacleSelection();
+
+    resetButton.addEventListener("click", () => {
+      syncOccupancy(500);
+      customDoorCheckboxes.forEach((checkbox) => { checkbox.checked = true; });
+      doorMenuTrigger.firstChild.textContent = "All doors available ";
+      obstacleCheckboxes.forEach((checkbox) => {
+        checkbox.checked = checkbox.value === "none";
+      });
+      updateObstacleSelection();
+      setOpenExits(["north", "south", "east", "west"]);
+      outputsCard.classList.remove("results-dimmed");
+      setStatus("Default scenario restored.", "success");
+    });
+
+    calculateButton.addEventListener("click", () => {
+      if (openExitDirections.size === 0) return;
+      calculateButton.disabled = true;
+      outputsCard.classList.add("results-dimmed");
+      setStatus("Calculating…");
+      window.setTimeout(() => {
+        outputsCard.classList.remove("results-dimmed");
+        calculateButton.disabled = false;
+        setStatus("Scenario ready. Evacuation results are awaiting Stage 3.", "success");
+      }, 350);
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!doorMenu.contains(event.target)) {
+        doorMenu.classList.remove("open");
+        customDoorWrap.classList.remove("open");
+        doorMenuTrigger.setAttribute("aria-expanded", "false");
+      }
+      if (!obstacleMenu.contains(event.target)) {
+        obstacleMenu.classList.remove("open");
+        obstacleMenuTrigger.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        doorMenu.classList.remove("open");
+        customDoorWrap.classList.remove("open");
+        obstacleMenu.classList.remove("open");
+        doorMenuTrigger.setAttribute("aria-expanded", "false");
+        obstacleMenuTrigger.setAttribute("aria-expanded", "false");
+        doorMenuTrigger.focus();
+      }
+    });
+  </script>
+</body>
+</html>
