@@ -520,7 +520,7 @@
     }
 
     .progress-fill {
-      width: 25%;
+      width: 0%;
       height: 100%;
       background: #789baa;
     }
@@ -530,6 +530,36 @@
       justify-content: space-between;
       color: var(--grey-600);
       font-size: 0.72rem;
+    }
+
+    #evacuation-chart .chart-grid,
+    #evacuation-chart .axis-label {
+      pointer-events: none;
+    }
+
+    #evacuation-chart polyline,
+    #evacuation-chart line,
+    #evacuation-chart circle {
+      vector-effect: non-scaling-stroke;
+    }
+
+    .chart-tooltip {
+      position: absolute;
+      z-index: 30;
+      display: none;
+      min-width: 120px;
+      border: 1px solid var(--grey-400);
+      border-radius: 6px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+      color: var(--ink);
+      padding: 7px 8px;
+      font-size: 0.75rem;
+      pointer-events: none;
+    }
+
+    .occupant {
+      transition: cx 0.25s linear, cy 0.25s linear, opacity 0.25s linear;
     }
 
     .obstacle-menu {
@@ -833,25 +863,25 @@
           </g>
 
           <g fill="#f7f9fa" stroke="#667178" stroke-width="3">
-            <g class="exit-group" data-direction="north" transform="translate(380 70)">
-              <rect x="-36" y="-14" width="72" height="28" rx="6"/>
+            <g class="exit-group" data-direction="north" transform="translate(100 76)">
+              <rect class="exit-marker" x="-36" y="-14" width="72" height="28" rx="6"/>
               <text x="0" y="5" text-anchor="middle" class="exit-label">North</text>
             </g>
-            <g class="exit-group" data-direction="south" transform="translate(380 490)">
-              <rect x="-36" y="-14" width="72" height="28" rx="6"/>
+            <g class="exit-group" data-direction="south" transform="translate(660 484)">
+              <rect class="exit-marker" x="-36" y="-14" width="72" height="28" rx="6"/>
               <text x="0" y="5" text-anchor="middle" class="exit-label">South</text>
             </g>
-            <g class="exit-group" data-direction="west" transform="translate(80 280)">
-              <rect x="-36" y="-14" width="72" height="28" rx="6"/>
+            <g class="exit-group" data-direction="west" transform="translate(100 484)">
+              <rect class="exit-marker" x="-36" y="-14" width="72" height="28" rx="6"/>
               <text x="0" y="5" text-anchor="middle" class="exit-label">West</text>
             </g>
-            <g class="exit-group" data-direction="east" transform="translate(680 280)">
-              <rect x="-36" y="-14" width="72" height="28" rx="6"/>
+            <g class="exit-group" data-direction="east" transform="translate(660 76)">
+              <rect class="exit-marker" x="-36" y="-14" width="72" height="28" rx="6"/>
               <text x="0" y="5" text-anchor="middle" class="exit-label">East</text>
             </g>
           </g>
 
-          <g aria-label="Occupant dots">
+          <g id="occupant-dots" aria-label="Occupant dots">
             <circle class="occupant" cx="200" cy="130" r="5"/>
             <circle class="occupant" cx="330" cy="130" r="5"/>
             <circle class="occupant" cx="430" cy="130" r="5"/>
@@ -876,41 +906,27 @@
       </div>
       <div class="outputs-body">
         <div class="result-grid" aria-label="Evacuation times">
-          <div class="result"><strong>--:--</strong><span>Total</span></div>
-          <div class="result"><strong>--:--</strong><span>50% evacuated</span></div>
-          <div class="result"><strong>--:--</strong><span>90% evacuated</span></div>
+          <div class="result"><strong id="total-time">--:--</strong><span>Total</span></div>
+          <div class="result"><strong id="time-50">--:--</strong><span>50% evacuated</span></div>
+          <div class="result"><strong id="time-90">--:--</strong><span>90% evacuated</span></div>
         </div>
 
         <div class="summary-grid" aria-label="Evacuation summary">
-          <div class="summary"><strong>4</strong><span>Open exits</span></div>
-          <div class="summary"><strong>576</strong><span>People/minute</span></div>
-          <div class="summary"><strong>--</strong><span>Peak people/minute</span></div>
+          <div class="summary"><strong id="open-exit-count">4</strong><span>Open exits</span></div>
+          <div class="summary"><strong id="door-capacity">576</strong><span>People/minute</span></div>
+          <div class="summary"><strong id="peak-rate">--</strong><span>Peak people/minute</span></div>
         </div>
 
         <div class="chart-card">
           <h3>Evacuation progress</h3>
-          <svg class="chart" viewBox="0 0 340 220" role="img" aria-label="Placeholder cumulative evacuation progress chart">
-            <g stroke="#dfe4e7" stroke-width="1">
-              <line x1="48" y1="30" x2="48" y2="180"/>
-              <line x1="48" y1="180" x2="320" y2="180"/>
-              <line x1="48" y1="143" x2="320" y2="143"/>
-              <line x1="48" y1="105" x2="320" y2="105"/>
-              <line x1="48" y1="68" x2="320" y2="68"/>
-              <line x1="48" y1="30" x2="320" y2="30"/>
-              <line x1="116" y1="30" x2="116" y2="180"/>
-              <line x1="184" y1="30" x2="184" y2="180"/>
-              <line x1="252" y1="30" x2="252" y2="180"/>
-              <line x1="320" y1="30" x2="320" y2="180"/>
-            </g>
-            <polyline points="48,180 116,143 184,105 252,68 320,30" fill="none" stroke="#789baa" stroke-width="4"/>
-            <polyline points="48,30 116,68 184,105 252,143 320,180" fill="none" stroke="#667178" stroke-width="3" stroke-dasharray="7 7"/>
-            <text x="48" y="198" fill="#667178" font-size="11">0</text>
-            <text x="112" y="198" fill="#667178" font-size="11">1</text>
-            <text x="180" y="198" fill="#667178" font-size="11">2</text>
-            <text x="248" y="198" fill="#667178" font-size="11">3</text>
-            <text x="310" y="198" fill="#667178" font-size="11">4 min</text>
-            <text x="12" y="24" fill="#667178" font-size="11">People</text>
+          <svg id="evacuation-chart" class="chart" viewBox="0 0 340 220" role="img" aria-label="Evacuated and remaining occupants over elapsed time">
+            <g id="chart-grid" class="chart-grid"></g>
+            <polyline id="evacuated-line" fill="none" stroke="#789baa" stroke-width="4"></polyline>
+            <polyline id="remaining-line" fill="none" stroke="#667178" stroke-width="3" stroke-dasharray="7 7"></polyline>
+            <g id="chart-marker"></g>
+            <g id="chart-tooltip-target"></g>
           </svg>
+          <div id="chart-tooltip" class="chart-tooltip" role="tooltip"></div>
           <div class="legend" aria-label="Chart legend">
             <div class="legend-item"><span class="legend-line"></span>Evacuated</div>
             <div class="legend-item"><span class="legend-line remaining"></span>Remaining</div>
@@ -918,17 +934,17 @@
         </div>
 
         <div class="animation-controls" aria-label="Animation controls">
-          <button type="button">Play</button>
-          <button type="button">Pause</button>
-          <button type="button">Reset</button>
-          <select aria-label="Animation speed">
-            <option>5x</option>
-            <option>10x</option>
-            <option>20x</option>
+          <button id="play-button" type="button">Play</button>
+          <button id="pause-button" type="button">Pause</button>
+          <button id="animation-reset-button" type="button">Reset</button>
+          <select id="animation-speed" aria-label="Animation speed">
+            <option value="5">5x</option>
+            <option value="10">10x</option>
+            <option value="20">20x</option>
           </select>
           <div class="progress-readout" aria-label="Evacuation progress">
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="25" aria-label="25 percent evacuated">
-              <div class="progress-fill"></div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="0 percent evacuated">
+              <div class="progress-fill" id="progress-fill"></div>
             </div>
             <div class="progress-labels" aria-hidden="true">
               <span>0%</span>
@@ -964,6 +980,10 @@
     const exitGroups = document.querySelectorAll(".exit-group");
 
     let openExitDirections = new Set(["north", "south", "east", "west"]);
+    let currentSimulation = null;
+    let playbackTimer = null;
+    let playbackSeconds = 0;
+    let playbackSpeed = 5;
 
     function updateObstacleSelection(changedCheckbox) {
       if (changedCheckbox && changedCheckbox.value === "none" && changedCheckbox.checked) {
@@ -1040,6 +1060,459 @@
       });
       setOpenExits(selected.map((label) => label.toLowerCase()));
       doorMenuTrigger.firstChild.textContent = "Custom selection ";
+    }
+
+    function getSelectedObstacles() {
+      return [...obstacleCheckboxes]
+        .filter((checkbox) => checkbox.checked)
+        .map((checkbox) => checkbox.value);
+    }
+
+    function formatMMSS(seconds) {
+      const rounded = Math.ceil(seconds);
+      const minutes = Math.floor(rounded / 60);
+      const remainder = rounded % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
+    }
+
+    function getRestrictedWalkingSpeed(obstacles) {
+      let speed = 4.3;
+      if (obstacles.includes("aisle")) speed *= 0.52;
+      if (obstacles.includes("seats")) speed *= 0.50;
+      if (obstacles.includes("stair")) speed *= 0.52;
+      return speed;
+    }
+
+    const exitCoordinates = {
+      north: { x: 100, y: 76 },
+      east: { x: 660, y: 76 },
+      south: { x: 660, y: 484 },
+      west: { x: 100, y: 484 }
+    };
+
+    const seatingZones = [
+      { minX: 180, maxX: 370, minY: 94, maxY: 178 },
+      { minX: 390, maxX: 580, minY: 94, maxY: 178 },
+      { minX: 180, maxX: 370, minY: 382, maxY: 466 },
+      { minX: 390, maxX: 580, minY: 382, maxY: 466 },
+      { minX: 78, maxX: 170, minY: 160, maxY: 270 },
+      { minX: 78, maxX: 170, minY: 290, maxY: 400 },
+      { minX: 590, maxX: 682, minY: 160, maxY: 270 },
+      { minX: 590, maxX: 682, minY: 290, maxY: 400 }
+    ];
+
+    function sampleSeatPosition() {
+      const zone = seatingZones[Math.floor(Math.random() * seatingZones.length)];
+      return {
+        x: zone.minX + Math.random() * (zone.maxX - zone.minX),
+        y: zone.minY + Math.random() * (zone.maxY - zone.minY)
+      };
+    }
+
+    function getRouteToExit(start, direction) {
+      const approachPoints = {
+        north: [{ x: 165, y: 185 }, { x: 112, y: 126 }],
+        east: [{ x: 595, y: 185 }, { x: 648, y: 126 }],
+        south: [{ x: 595, y: 375 }, { x: 648, y: 434 }],
+        west: [{ x: 165, y: 375 }, { x: 112, y: 434 }]
+      };
+      return [start, ...approachPoints[direction], exitCoordinates[direction]];
+    }
+
+    function getPositionOnRoute(route, progress) {
+      const segmentLengths = [];
+      let totalLength = 0;
+      for (let index = 1; index < route.length; index += 1) {
+        const dx = route[index].x - route[index - 1].x;
+        const dy = route[index].y - route[index - 1].y;
+        const length = Math.hypot(dx, dy);
+        segmentLengths.push(length);
+        totalLength += length;
+      }
+
+      let distance = totalLength * Math.max(0, Math.min(1, progress));
+      for (let index = 0; index < segmentLengths.length; index += 1) {
+        const length = segmentLengths[index];
+        if (distance <= length || index === segmentLengths.length - 1) {
+          const ratio = length === 0 ? 1 : distance / length;
+          return {
+            x: route[index].x + (route[index + 1].x - route[index].x) * ratio,
+            y: route[index].y + (route[index + 1].y - route[index].y) * ratio
+          };
+        }
+        distance -= length;
+      }
+      return route[route.length - 1];
+    }
+
+    function getQueuePosition(direction, queueIndex) {
+      const exit = exitCoordinates[direction];
+      const center = { x: 380, y: 280 };
+      const dx = center.x - exit.x;
+      const dy = center.y - exit.y;
+      const length = Math.hypot(dx, dy);
+      const inward = { x: dx / length, y: dy / length };
+      const perpendicular = { x: -inward.y, y: inward.x };
+      const row = Math.floor(queueIndex / 8);
+      const column = queueIndex % 8;
+      const offset = (column - 3.5) * 5;
+      const distance = 18 + row * 6;
+      return {
+        x: exit.x + inward.x * distance + perpendicular.x * offset,
+        y: exit.y + inward.y * distance + perpendicular.y * offset
+      };
+    }
+
+    function runEvacuationSimulation() {
+      if (openExitDirections.size === 0) return null;
+
+      const occupancy = syncOccupancy(occupancyNumber.value);
+      const obstacles = getSelectedObstacles();
+      const walkingSpeed = getRestrictedWalkingSpeed(obstacles);
+      const doorCapacityPerExit = 24 * 6;
+      const aisleCapacityFactor = obstacles.includes("aisle") ? 0.8 : 1;
+      const totalDoorCapacity = doorCapacityPerExit * openExitDirections.size * aisleCapacityFactor;
+      const routeDistance = 200;
+      const walkingTime = routeDistance / walkingSpeed;
+      const directions = [...openExitDirections];
+      const people = [];
+      const queues = new Map(directions.map((direction) => [direction, []]));
+
+      for (let occupant = 0; occupant < occupancy; occupant += 1) {
+        const start = sampleSeatPosition();
+        const direction = directions.reduce((nearest, candidate) => {
+          const nearestExit = exitCoordinates[nearest];
+          const candidateExit = exitCoordinates[candidate];
+          const nearestDistance = Math.hypot(start.x - nearestExit.x, start.y - nearestExit.y);
+          const candidateDistance = Math.hypot(start.x - candidateExit.x, start.y - candidateExit.y);
+          return candidateDistance < nearestDistance ? candidate : nearest;
+        }, directions[0]);
+        const person = {
+          start,
+          direction,
+          route: getRouteToExit(start, direction),
+          arrivalTime: walkingTime
+        };
+        people.push(person);
+        queues.get(direction).push(person);
+      }
+
+      const exitTimes = [];
+      const serviceInterval = 60 / (doorCapacityPerExit * aisleCapacityFactor);
+      queues.forEach((queue, direction) => {
+        queue.sort((a, b) => a.arrivalTime - b.arrivalTime);
+        let nextAvailableTime = 0;
+        queue.forEach((person, queueIndex) => {
+          person.queueIndex = queueIndex;
+          person.queuePosition = getQueuePosition(direction, queueIndex);
+          person.serviceStart = Math.max(person.arrivalTime, nextAvailableTime);
+          person.exitTime = person.serviceStart + serviceInterval;
+          nextAvailableTime = person.exitTime;
+          exitTimes.push(person.exitTime);
+        });
+      });
+
+      exitTimes.sort((a, b) => a - b);
+      const totalSeconds = Math.ceil(exitTimes[exitTimes.length - 1]);
+      const time50 = exitTimes[Math.ceil(occupancy * 0.5) - 1];
+      const time90 = exitTimes[Math.ceil(occupancy * 0.9) - 1];
+      const timeSeries = [];
+      for (let time = 0; time <= totalSeconds; time += 1) {
+        const evacuated = exitTimes.findIndex((exitTime) => exitTime > time);
+        const evacuatedCount = evacuated === -1 ? occupancy : evacuated;
+        timeSeries.push({
+          time,
+          evacuated: evacuatedCount,
+          remaining: occupancy - evacuatedCount
+        });
+      }
+
+      let peakRate = 1;
+      let endIndex = 0;
+      for (let startIndex = 0; startIndex < exitTimes.length; startIndex += 1) {
+        while (
+          endIndex < exitTimes.length &&
+          exitTimes[endIndex] - exitTimes[startIndex] < 60 - 1e-9
+        ) {
+          endIndex += 1;
+        }
+        peakRate = Math.max(peakRate, endIndex - startIndex);
+      }
+      peakRate = Math.min(peakRate, Math.floor(totalDoorCapacity));
+
+      return {
+        occupancy,
+        openExitCount: openExitDirections.size,
+        doorCapacity: Math.round(totalDoorCapacity),
+        peakRate,
+        totalSeconds,
+        time50,
+        time90,
+        timeSeries,
+        people
+      };
+    }
+
+    function getSeriesAtTime(series, seconds) {
+      let result = series[0];
+      for (const point of series) {
+        if (point.time <= seconds) result = point;
+        else break;
+      }
+      return result;
+    }
+
+    function renderChart(simulation) {
+      const chart = document.querySelector("#evacuation-chart");
+      const grid = document.querySelector("#chart-grid");
+      const evacuatedLine = document.querySelector("#evacuated-line");
+      const remainingLine = document.querySelector("#remaining-line");
+      const markerGroup = document.querySelector("#chart-marker");
+      const tooltipTarget = document.querySelector("#chart-tooltip-target");
+      const tooltip = document.querySelector("#chart-tooltip");
+      const left = 48;
+      const right = 320;
+      const top = 30;
+      const bottom = 180;
+      const maxTimeMinutes = Math.max(1, simulation.totalSeconds / 60);
+      const xScale = (right - left) / maxTimeMinutes;
+      const yScale = (bottom - top) / simulation.occupancy;
+
+      grid.innerHTML = "";
+      for (let i = 0; i <= 5; i += 1) {
+        const y = bottom - ((bottom - top) * i / 5);
+        const x = left + ((right - left) * i / 5);
+        const h = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        h.setAttribute("x1", left);
+        h.setAttribute("x2", right);
+        h.setAttribute("y1", y);
+        h.setAttribute("y2", y);
+        h.setAttribute("stroke", "#dfe4e7");
+        h.setAttribute("stroke-width", "1");
+        grid.appendChild(h);
+
+        const v = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        v.setAttribute("x1", x);
+        v.setAttribute("x2", x);
+        v.setAttribute("y1", top);
+        v.setAttribute("y2", bottom);
+        v.setAttribute("stroke", "#dfe4e7");
+        v.setAttribute("stroke-width", "1");
+        grid.appendChild(v);
+      }
+
+      const samplePoints = [];
+      for (let minute = 0; minute <= maxTimeMinutes; minute += 1) {
+        const seconds = minute * 60;
+        if (seconds > simulation.totalSeconds && minute > 0) break;
+        samplePoints.push(getSeriesAtTime(simulation.timeSeries, seconds));
+      }
+      if (samplePoints[samplePoints.length - 1].time < simulation.totalSeconds) {
+        samplePoints.push(getSeriesAtTime(simulation.timeSeries, simulation.totalSeconds));
+      }
+
+      const evacuatedPoints = samplePoints.map((point) =>
+        `${left + (point.time / 60) * xScale},${bottom - point.evacuated * yScale}`
+      );
+      const remainingPoints = samplePoints.map((point) =>
+        `${left + (point.time / 60) * xScale},${bottom - point.remaining * yScale}`
+      );
+      evacuatedLine.setAttribute("points", evacuatedPoints.join(" "));
+      remainingLine.setAttribute("points", remainingPoints.join(" "));
+
+      markerGroup.innerHTML = "";
+      tooltipTarget.innerHTML = "";
+      const x50 = left + (simulation.time50 / 60) * xScale;
+      const x90 = left + (simulation.time90 / 60) * xScale;
+      const y50 = bottom - (simulation.occupancy * 0.5) * yScale;
+      const y90 = bottom - (simulation.occupancy * 0.9) * yScale;
+
+      [
+        { x: x50, y: y50, label: "50%" },
+        { x: x90, y: y90, label: "90%" }
+      ].forEach((marker) => {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.classList.add("threshold-marker", marker.label === "50%" ? "marker-50" : "marker-90");
+        circle.setAttribute("cx", marker.x);
+        circle.setAttribute("cy", marker.y);
+        circle.setAttribute("r", "4");
+        circle.setAttribute("fill", "#2f6f4e");
+        circle.setAttribute("stroke", "#ffffff");
+        markerGroup.appendChild(circle);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.classList.add("threshold-marker", marker.label === "50%" ? "marker-50" : "marker-90");
+        text.setAttribute("x", marker.x);
+        text.setAttribute("y", marker.y - 8);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("fill", "#667178");
+        text.setAttribute("font-size", "9");
+        text.textContent = marker.label;
+        markerGroup.appendChild(text);
+      });
+
+      const finalX = right;
+      const finalY = bottom;
+      const finalCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      finalCircle.classList.add("final-marker");
+      finalCircle.setAttribute("cx", finalX);
+      finalCircle.setAttribute("cy", finalY);
+      finalCircle.setAttribute("r", "5");
+      finalCircle.setAttribute("fill", "#2f6f4e");
+      markerGroup.appendChild(finalCircle);
+
+      samplePoints.forEach((point) => {
+        const hit = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        hit.setAttribute("cx", left + (point.time / 60) * xScale);
+        hit.setAttribute("cy", bottom - point.evacuated * yScale);
+        hit.setAttribute("r", "8");
+        hit.setAttribute("fill", "transparent");
+        hit.addEventListener("mouseenter", (event) => {
+          tooltip.textContent =
+            `${formatMMSS(point.time)} | Evacuated: ${point.evacuated} | Remaining: ${point.remaining}`;
+          tooltip.style.display = "block";
+          tooltip.style.left = `${event.clientX - chart.getBoundingClientRect().left + 8}px`;
+          tooltip.style.top = `${event.clientY - chart.getBoundingClientRect().top - 32}px`;
+        });
+        hit.addEventListener("mouseleave", () => {
+          tooltip.style.display = "none";
+        });
+        tooltipTarget.appendChild(hit);
+      });
+
+      const yAxis = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      yAxis.setAttribute("x", "10");
+      yAxis.setAttribute("y", "24");
+      yAxis.setAttribute("fill", "#667178");
+      yAxis.setAttribute("font-size", "11");
+      yAxis.textContent = "People";
+      grid.appendChild(yAxis);
+
+      const xAxis = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      xAxis.setAttribute("x", right - 4);
+      xAxis.setAttribute("y", "198");
+      xAxis.setAttribute("text-anchor", "end");
+      xAxis.setAttribute("fill", "#667178");
+      xAxis.setAttribute("font-size", "11");
+      xAxis.textContent = `${Math.ceil(maxTimeMinutes)} min`;
+      grid.appendChild(xAxis);
+    }
+
+    function createOccupantDots(simulation) {
+      const group = document.querySelector("#occupant-dots");
+      group.innerHTML = "";
+      simulation.people.forEach((person, index) => {
+        const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        dot.setAttribute("class", "occupant");
+        dot.setAttribute("cx", person.start.x);
+        dot.setAttribute("cy", person.start.y);
+        dot.setAttribute("r", simulation.occupancy > 1000 ? "2.5" : "3.5");
+        dot.dataset.personIndex = String(index);
+        dot.dataset.startCx = dot.getAttribute("cx");
+        dot.dataset.startCy = dot.getAttribute("cy");
+        group.appendChild(dot);
+      });
+    }
+
+    function resetOccupantDots() {
+      const dots = document.querySelectorAll("#occupant-dots .occupant");
+      dots.forEach((dot) => {
+        if (dot.dataset.startCx === undefined || dot.dataset.startCy === undefined) return;
+        dot.setAttribute("cx", dot.dataset.startCx);
+        dot.setAttribute("cy", dot.dataset.startCy);
+        dot.style.opacity = "1";
+      });
+    }
+
+    function updateAnimation(seconds) {
+      if (!currentSimulation) return;
+      const currentTime = Math.max(0, Math.min(seconds, currentSimulation.totalSeconds));
+      const evacuated = getSeriesAtTime(currentSimulation.timeSeries, currentTime).evacuated;
+      const progress = evacuated / currentSimulation.occupancy;
+      const dots = [...document.querySelectorAll("#occupant-dots .occupant")];
+
+      dots.forEach((dot) => {
+        const person = currentSimulation.people[Number(dot.dataset.personIndex)];
+        let position;
+        if (currentTime < person.arrivalTime) {
+          position = getPositionOnRoute(person.route, currentTime / person.arrivalTime);
+          dot.style.opacity = "1";
+        } else if (currentTime < person.exitTime) {
+          if (currentTime < person.serviceStart) {
+            position = person.queuePosition;
+          } else {
+            const serviceProgress =
+              (currentTime - person.serviceStart) / (person.exitTime - person.serviceStart);
+            const exit = exitCoordinates[person.direction];
+            position = {
+              x: person.queuePosition.x + (exit.x - person.queuePosition.x) * serviceProgress,
+              y: person.queuePosition.y + (exit.y - person.queuePosition.y) * serviceProgress
+            };
+          }
+          dot.style.opacity = "1";
+        } else {
+          position = exitCoordinates[person.direction];
+          dot.style.opacity = "0";
+        }
+        dot.setAttribute("cx", position.x);
+        dot.setAttribute("cy", position.y);
+      });
+
+      const progressPercent = progress * 100;
+      const progressFill = document.querySelector("#progress-fill");
+      progressFill.style.width = `${progressPercent}%`;
+      const progressTrack = document.querySelector(".progress-track");
+      progressTrack.setAttribute("aria-valuenow", String(Math.round(progressPercent)));
+      progressTrack.setAttribute("aria-label", `${Math.round(progressPercent)} percent evacuated`);
+      document.querySelector("#chart-marker").dataset.currentEvacuated = evacuated;
+      document.querySelectorAll(".marker-50").forEach((marker) => {
+        marker.style.display = currentTime >= currentSimulation.time50 ? "" : "none";
+      });
+      document.querySelectorAll(".marker-90").forEach((marker) => {
+        marker.style.display = currentTime >= currentSimulation.time90 ? "" : "none";
+      });
+      document.querySelector(".final-marker").style.display =
+        currentTime >= currentSimulation.totalSeconds ? "" : "none";
+
+      const evacuatedLine = document.querySelector("#evacuated-line");
+      const maxTimeMinutes = Math.max(1, currentSimulation.totalSeconds / 60);
+      const left = 48;
+      const right = 320;
+      const top = 30;
+      const bottom = 180;
+      const yScale = (bottom - top) / currentSimulation.occupancy;
+      const xScale = (right - left) / maxTimeMinutes;
+      const visiblePoints = currentSimulation.timeSeries
+        .filter((point) => point.time <= currentTime)
+        .map((point) => `${left + (point.time / 60) * xScale},${bottom - point.evacuated * yScale}`);
+      evacuatedLine.setAttribute("points", visiblePoints.join(" "));
+      const remainingLine = document.querySelector("#remaining-line");
+      const remainingPoints = currentSimulation.timeSeries
+        .filter((point) => point.time <= currentTime)
+        .map((point) => `${left + (point.time / 60) * xScale},${bottom - point.remaining * yScale}`);
+      remainingLine.setAttribute("points", remainingPoints.join(" "));
+    }
+
+    function stopPlayback(resetSeconds = true) {
+      if (playbackTimer) window.clearInterval(playbackTimer);
+      playbackTimer = null;
+      if (resetSeconds) playbackSeconds = 0;
+    }
+
+    function startPlayback() {
+      if (!currentSimulation) return;
+      if (playbackSeconds >= currentSimulation.totalSeconds) playbackSeconds = 0;
+      if (playbackTimer) window.clearInterval(playbackTimer);
+      playbackTimer = window.setInterval(() => {
+        playbackSeconds += playbackSpeed / 10;
+        updateAnimation(playbackSeconds);
+        if (playbackSeconds >= currentSimulation.totalSeconds) {
+          playbackSeconds = currentSimulation.totalSeconds;
+          updateAnimation(playbackSeconds);
+          stopPlayback(false);
+          setStatus("Evacuation complete.", "success");
+        }
+      }, 100);
     }
 
     setOpenExits(["north", "south", "east", "west"]);
@@ -1120,6 +1593,20 @@
       });
       updateObstacleSelection();
       setOpenExits(["north", "south", "east", "west"]);
+      currentSimulation = null;
+      document.querySelector("#total-time").textContent = "--:--";
+      document.querySelector("#time-50").textContent = "--:--";
+      document.querySelector("#time-90").textContent = "--:--";
+      document.querySelector("#open-exit-count").textContent = "4";
+      document.querySelector("#door-capacity").textContent = "576";
+      document.querySelector("#peak-rate").textContent = "--";
+      stopPlayback();
+      document.querySelector("#evacuated-line").setAttribute("points", "");
+      document.querySelector("#remaining-line").setAttribute("points", "");
+      document.querySelector("#chart-marker").innerHTML = "";
+      document.querySelector("#progress-fill").style.width = "0%";
+      document.querySelector(".progress-track").setAttribute("aria-valuenow", "0");
+      resetOccupantDots();
       outputsCard.classList.remove("results-dimmed");
       setStatus("Default scenario restored.", "success");
     });
@@ -1130,10 +1617,51 @@
       outputsCard.classList.add("results-dimmed");
       setStatus("Calculating…");
       window.setTimeout(() => {
+        currentSimulation = runEvacuationSimulation();
+        if (!currentSimulation) {
+          outputsCard.classList.remove("results-dimmed");
+          calculateButton.disabled = false;
+          setStatus("Evacuation time is undefined.", "error");
+          return;
+        }
+
+        document.querySelector("#total-time").textContent = formatMMSS(currentSimulation.totalSeconds);
+        document.querySelector("#time-50").textContent = formatMMSS(currentSimulation.time50);
+        document.querySelector("#time-90").textContent = formatMMSS(currentSimulation.time90);
+        document.querySelector("#open-exit-count").textContent = String(currentSimulation.openExitCount);
+        document.querySelector("#door-capacity").textContent = String(currentSimulation.doorCapacity);
+        document.querySelector("#peak-rate").textContent = String(currentSimulation.peakRate);
+        stopPlayback();
+        renderChart(currentSimulation);
+        createOccupantDots(currentSimulation);
+        resetOccupantDots();
+        updateAnimation(0);
+
         outputsCard.classList.remove("results-dimmed");
         calculateButton.disabled = false;
-        setStatus("Scenario ready. Evacuation results are awaiting Stage 3.", "success");
+        setStatus("Evacuation animation started.", "success");
+        startPlayback();
       }, 350);
+    });
+
+    document.querySelector("#play-button").addEventListener("click", startPlayback);
+
+    document.querySelector("#pause-button").addEventListener("click", () => {
+      stopPlayback(false);
+    });
+
+    document.querySelector("#animation-reset-button").addEventListener("click", () => {
+      stopPlayback();
+      updateAnimation(0);
+      resetOccupantDots();
+    });
+
+    document.querySelector("#animation-speed").addEventListener("change", (event) => {
+      playbackSpeed = Number(event.target.value);
+      if (playbackTimer) {
+        stopPlayback(false);
+        startPlayback();
+      }
     });
 
     document.addEventListener("click", (event) => {
