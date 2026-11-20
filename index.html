@@ -320,6 +320,46 @@
       font-size: 0.72rem;
     }
 
+    .comparison-panel {
+      display: grid;
+      gap: 5px;
+      padding: 14px;
+      border: 1px solid var(--grey-200);
+      border-left: 5px solid var(--grey-400);
+      border-radius: 8px;
+      background: var(--grey-50);
+    }
+
+    .comparison-panel > span {
+      color: var(--grey-800);
+      font-weight: 700;
+    }
+
+    .comparison-panel strong {
+      font-size: 2rem;
+      line-height: 1.1;
+    }
+
+    .comparison-panel small {
+      color: var(--grey-600);
+    }
+
+    .comparison-panel.yes {
+      border-left-color: var(--success);
+    }
+
+    .comparison-panel.yes strong {
+      color: var(--success);
+    }
+
+    .comparison-panel.no {
+      border-left-color: var(--danger);
+    }
+
+    .comparison-panel.no strong {
+      color: var(--danger);
+    }
+
     .chart-card {
       border: 1px solid var(--grey-200);
       border-radius: 8px;
@@ -809,6 +849,17 @@
         </div>
 
         <div class="field">
+          <label for="emergency-scenario">Emergency scenario</label>
+          <select id="emergency-scenario" aria-describedby="emergency-help">
+            <option value="none">No specific emergency</option>
+            <option value="fire">Fire</option>
+            <option value="active-shooter">Active shooter</option>
+            <option value="earthquake">Earthquake</option>
+          </select>
+          <span id="emergency-help" class="help">Prefills exit availability and any scenario time or speed limits. Review inputs before calculating.</span>
+        </div>
+
+        <div class="field">
           <label for="door-preset">Door availability</label>
           <div class="door-menu" id="door-preset">
             <button class="door-menu-trigger" type="button" aria-haspopup="menu" aria-controls="door-menu-list" aria-expanded="false">
@@ -822,10 +873,10 @@
                   <span>Custom door selection</span><span aria-hidden="true">→</span>
                 </button>
                 <div class="custom-door-panel" id="custom-door-panel" role="group" aria-label="Choose exit door groups">
-                  <label><input type="checkbox" checked> North</label>
-                  <label><input type="checkbox" checked> South</label>
-                  <label><input type="checkbox" checked> East</label>
-                  <label><input type="checkbox" checked> West</label>
+                  <label><input type="checkbox" data-direction="north" checked> North</label>
+                  <label><input type="checkbox" data-direction="south" checked> South</label>
+                  <label><input type="checkbox" data-direction="east" checked> East</label>
+                  <label><input type="checkbox" data-direction="west" checked> West</label>
                 </div>
               </div>
             </div>
@@ -1015,6 +1066,12 @@
             <div class="summary"><strong id="door-capacity">576</strong><span>People/minute</span></div>
             <div class="summary"><strong id="peak-rate">--</strong><span>Peak people/minute</span></div>
           </div>
+
+          <div class="comparison-panel neutral" id="time-comparison" role="status" aria-live="polite">
+            <span>Meets evacuation time:</span>
+            <strong id="meets-time">N/A</strong>
+            <small id="time-limit-label">No time limit selected</small>
+          </div>
         </div>
 
         <div class="chart-card">
@@ -1047,6 +1104,7 @@
     const customDoorCheckboxes = customDoorPanel.querySelectorAll('input[type="checkbox"]');
     const occupancyNumber = document.querySelector("#occupancy");
     const occupancyRange = document.querySelector("#occupancy-range");
+    const emergencyScenarioSelect = document.querySelector("#emergency-scenario");
     const obstacleMenu = document.querySelector(".obstacle-menu");
     const obstacleMenuTrigger = obstacleMenu.querySelector(".obstacle-menu-trigger");
     const obstacleCheckboxes = obstacleMenu.querySelectorAll('input[type="checkbox"]');
@@ -1064,6 +1122,19 @@
     let playbackTimer = null;
     let playbackSeconds = 0;
     let playbackSpeed = 5;
+    let emergencyTimeLimitSeconds = null;
+    let emergencyWalkingSpeedFactor = 1;
+
+    const emergencyPresets = {
+      fire: { exits: ["north"], timeLimitSeconds: 300, speedFactor: 1, label: "Fire" },
+      "active-shooter": { exits: ["south"], timeLimitSeconds: 180, speedFactor: 1, label: "Active shooter" },
+      earthquake: {
+        exits: ["north", "south", "east", "west"],
+        timeLimitSeconds: 420,
+        speedFactor: 0.4,
+        label: "Earthquake"
+      }
+    };
 
     function updateObstacleSelection(changedCheckbox) {
       if (changedCheckbox && changedCheckbox.value === "none" && changedCheckbox.checked) {
@@ -1094,6 +1165,7 @@
       setStatus(selected.length === 1
         ? selected[0]
         : `Combined: ${selected.join(", ")}`);
+      renderTimeComparison();
     }
 
     function setStatus(message = "", type = "") {
@@ -1103,6 +1175,23 @@
       const floorStatus = document.querySelector("#floor-status");
       floorStatus.hidden = type !== "error";
       floorStatus.textContent = type === "error" ? `${prefix}${message}` : "";
+    }
+
+    function renderTimeComparison(totalSeconds = null, timeLimitSeconds = emergencyTimeLimitSeconds) {
+      const panel = document.querySelector("#time-comparison");
+      const result = document.querySelector("#meets-time");
+      const limitLabel = document.querySelector("#time-limit-label");
+      const hasTarget = timeLimitSeconds !== null;
+      const hasResult = Number.isFinite(totalSeconds);
+      const status = !hasTarget || !hasResult
+        ? "neutral"
+        : totalSeconds <= timeLimitSeconds ? "yes" : "no";
+
+      panel.className = `comparison-panel ${status}`;
+      result.textContent = status === "neutral" ? "N/A" : status.toUpperCase();
+      limitLabel.textContent = hasTarget
+        ? `Time limit: ${formatMMSS(timeLimitSeconds)}`
+        : "No time limit selected";
     }
 
     function clampOccupancy(value) {
@@ -1138,6 +1227,7 @@
       const progressTrack = document.querySelector(".progress-track");
       progressTrack.setAttribute("aria-valuenow", "0");
       progressTrack.setAttribute("aria-label", "0 percent evacuated");
+      renderTimeComparison();
       const timeline = document.querySelector("#animation-timeline");
       timeline.value = "0";
       timeline.setAttribute("aria-valuetext", "00:00");
@@ -1166,6 +1256,7 @@
         if (document.querySelector("#total-time").textContent === "N/A") {
           clearSimulationResults();
         }
+        renderTimeComparison();
         setStatus(`${openExitDirections.size} exit group${openExitDirections.size === 1 ? "" : "s"} open.`);
       }
     }
@@ -1177,6 +1268,28 @@
       });
       setOpenExits(selected.map((label) => label.toLowerCase()));
       doorMenuTrigger.firstChild.textContent = "Custom selection ";
+    }
+
+    function applyEmergencyPreset(presetKey) {
+      const preset = emergencyPresets[presetKey];
+      if (!preset) {
+        emergencyTimeLimitSeconds = null;
+        emergencyWalkingSpeedFactor = 1;
+        renderTimeComparison();
+        setStatus("No specific emergency selected. Existing settings remain active.");
+        return;
+      }
+
+      emergencyTimeLimitSeconds = preset.timeLimitSeconds;
+      emergencyWalkingSpeedFactor = preset.speedFactor;
+      customDoorCheckboxes.forEach((checkbox) => {
+        checkbox.checked = preset.exits.includes(checkbox.dataset.direction);
+      });
+      setOpenExits(preset.exits);
+      doorMenuTrigger.firstChild.textContent =
+        preset.exits.length === 4 ? "All doors available " : "Custom selection ";
+      renderTimeComparison();
+      setStatus(`${preset.label} preset loaded. Review the settings, then press Calculate.`);
     }
 
     function getSelectedObstacles() {
@@ -1295,7 +1408,7 @@
 
       const occupancy = syncOccupancy(occupancyNumber.value);
       const obstacles = getSelectedObstacles();
-      const walkingSpeed = getRestrictedWalkingSpeed(obstacles);
+      const walkingSpeed = getRestrictedWalkingSpeed(obstacles) * emergencyWalkingSpeedFactor;
       const doorCapacityPerExit = 24 * 6;
       const aisleCapacityFactor = obstacles.includes("aisle") ? 0.8 : 1;
       const totalDoorCapacity = doorCapacityPerExit * openExitDirections.size * aisleCapacityFactor;
@@ -1389,7 +1502,8 @@
         time50,
         time90,
         timeSeries,
-        people
+        people,
+        timeLimitSeconds: emergencyTimeLimitSeconds
       };
     }
 
@@ -1711,6 +1825,7 @@
       if (occupancyNumber.value !== "") {
         occupancyRange.value = String(clampOccupancy(occupancyNumber.value));
       }
+      renderTimeComparison();
     });
 
     occupancyNumber.addEventListener("change", () => {
@@ -1723,6 +1838,11 @@
 
     occupancyRange.addEventListener("input", () => {
       syncOccupancy(occupancyRange.value);
+      renderTimeComparison();
+    });
+
+    emergencyScenarioSelect.addEventListener("change", () => {
+      applyEmergencyPreset(emergencyScenarioSelect.value);
     });
 
     obstacleMenuTrigger.addEventListener("click", () => {
@@ -1740,6 +1860,9 @@
 
     resetButton.addEventListener("click", () => {
       syncOccupancy(500);
+      emergencyScenarioSelect.value = "none";
+      emergencyTimeLimitSeconds = null;
+      emergencyWalkingSpeedFactor = 1;
       customDoorCheckboxes.forEach((checkbox) => { checkbox.checked = true; });
       doorMenuTrigger.firstChild.textContent = "All doors available ";
       obstacleCheckboxes.forEach((checkbox) => {
@@ -1755,6 +1878,7 @@
       if (openExitDirections.size === 0) return;
       calculateButton.disabled = true;
       stopPlayback(false);
+      renderTimeComparison();
       animationButtons.forEach((control) => { control.disabled = true; });
       outputsCard.classList.add("results-dimmed");
       floorCard.classList.add("results-dimmed");
@@ -1775,6 +1899,7 @@
         document.querySelector("#open-exit-count").textContent = String(currentSimulation.openExitCount);
         document.querySelector("#door-capacity").textContent = String(currentSimulation.doorCapacity);
         document.querySelector("#peak-rate").textContent = String(currentSimulation.peakRate);
+        renderTimeComparison(currentSimulation.totalSeconds, currentSimulation.timeLimitSeconds);
         stopPlayback();
         renderChart(currentSimulation);
         createOccupantDots(currentSimulation);

@@ -221,3 +221,19 @@ Check at completion:
 - Reduced-motion playback limits dot movement.
 - The app excludes exports, saved settings, live feeds, and alternate floor-plan imports.
 - No unrelated files are added to the repository root.
+
+## Features
+
+### Emergency scenario presets
+- Add an emergency-scenario dropdown with a default “No specific emergency” selection and these presets:
+  - Fire: prefill the north exit group as the available exit and set the evacuation time limit to 05:00.
+  - Active shooter: prefill the south exit group as the available exit and set the evacuation time limit to 03:00.
+  - Earthquake: prefill all exit groups as available, apply a 0.4 walking-speed factor, and set the evacuation time limit to 07:00.
+- Selecting a preset pre-populates its associated scenario inputs. The user may change the populated inputs before calculating; preset selection does not lock the controls or automatically calculate.
+- Values not specified by a preset, including occupancy and obstacle selections, retain their current values.
+- Add a results-side panel titled “Meets evacuation time:”. After calculation, display “YES” when the calculated total evacuation time is at or below the selected limit, and “NO” when it exceeds the limit. Display “N/A” when no specific emergency or time limit is selected, or before a calculation is available.
+
+### Stairway/level restriction behavior
+- Selecting the stairway/level restriction multiplies the baseline walking speed by 0.52. With a baseline speed of 4.3 feet/second, the resulting walking speed is 2.236 feet/second.
+- When combined with other selected obstacles, apply the stairway/level walking-speed factor alongside the other applicable factors.
+- This restriction alone does not close exit groups, change door capacity, or apply the aisle-capacity reduction.
