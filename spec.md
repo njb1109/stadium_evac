@@ -1,5 +1,16 @@
 ## Stadium Evacuation
 
+## App overview
+This is a single-file planning and training web app for the Marriott Center. It accepts occupancy, door availability, and obstacle scenarios, then estimates evacuation timing using a fixed floor-plan model. It calculates total evacuation time plus 50% and 90% evacuation timestamps, displays evacuated and remaining-occupant progress, and animates occupants moving to open exit doors. It is for desktop and mobile planning use, not live incident operations or certified life-safety analysis.
+
+## File placement
+- The app code and UI will be written in top-level `index.html`, as required for GitHub Pages.
+- Supporting data used to implement fixed routes, door groups, or floor-plan values will go in `01_data/`.
+- Hand calculations and test data used to verify the app will go in `02_validation/`.
+- Screenshots and exported planning results will go in `03_output/`.
+- Notes and sketches used during layout or simulation planning will go in `00_planning/`.
+- `spec.md`, `AGENTS.md`, and `prompts.md` remain at the top level. Project implementation should not add unrelated files to the repository root.
+
 ## Purpose
 A planning and training app for facilities managers, building operators, event staff, emergency responders, and planning personnel. It models the Marriott Center floor plan and estimates total evacuation time, 50% evacuation time, and 90% evacuation time based on occupant count and inputs that materially affect walking or door flow. It is intended only for planning and training scenarios, not for live operational or real-time incident decision support. Results are estimates and do not replace approved emergency procedures or a certified fire/life-safety analysis.
 
@@ -129,3 +140,84 @@ A planning and training app for facilities managers, building operators, event s
 - User-entered or uploaded data files in the app. Floor-plan imports or alternate venue support may be considered in a future version, but are excluded from the current Marriott Center app.
 - Exporting or downloading chart images, results, CSV files, or reports.
 - Automatic calculation as inputs change; recalculation requires pressing Calculate.
+
+## Build stages
+
+### Stage 1 - Page layout mockup
+Build the static visual structure in `index.html` before adding behavior.
+
+- Create desktop regions for inputs on the left, the Marriott Center floor plan in the center, and results/chart controls on the right.
+- Add compact controls, labels, raised cards, a main result area, chart placeholder, floor-plan placeholder, and mobile tabs.
+- Establish the light-neutral and grey palette, typography, spacing, focus, hover, and responsive breakpoints.
+- Put the mockup code in top-level `index.html`; put optional layout sketches or notes in `00_planning/`.
+
+Check at completion:
+- The default 500-person, all-exits-open, no-obstacle scenario is represented visually.
+- Inputs, floor plan, results, and chart are positioned clearly.
+- Desktop is balanced and mobile has Inputs, Floor Plan, Chart, and Statistics tabs.
+- The page has usable keyboard focus and narrow-screen behavior.
+
+### Stage 2 - Inputs and UI state
+Build controls and client-side state.
+
+- Add the occupancy number field and slider for 100-2000 people.
+- Add the door preset control and north/south/east/west groups.
+- Add the fixed obstacle dropdown and reset behavior.
+- Add Calculate and loading/error states.
+- Keep control markup and behavior in top-level `index.html`.
+
+Check at completion:
+- 500 is the default occupancy and all exits are open.
+- Values below 100 and above 2000 are clamped.
+- Preset changes update only the intended exit groups.
+- Reset restores the default scenario.
+- No-exit selection shows an inline error and disables animation.
+
+### Stage 3 - Simulation and calculations
+Implement the fixed Marriott Center route and evacuation model.
+
+- Use random occupant placement with no fixed seed.
+- Apply walking speed, route distance, obstacle, door-flow, queue, and no-exit rules.
+- Record total, 50%, and 90% evacuation times.
+- Build cumulative evacuated and remaining-occupant time series.
+- Put fixed routes, exit groups, door widths, or lookup data in `01_data/` if separate project files are needed.
+- Put the implementation code and equations used for the app in top-level `index.html`.
+- Put hand-calculation records and test-case inputs/expected results in `02_validation/`.
+
+Check at completion:
+- The normal result rounds to 142 seconds (02:22).
+- The 50% threshold occurs at 250 evacuated and the 90% threshold at 450 evacuated in the stated test.
+- All closed exits return an undefined time and error.
+- 100 and 2000 occupants remain valid boundary cases.
+
+### Stage 4 - Charts and floor-plan animation
+Build output and visualization behavior.
+
+- Display MM:SS results for total, 50%, and 90% evacuation.
+- Add two labelled one-minute series: people evacuated and people remaining.
+- Add chart tooltips, gridlines, final markers, and peak evacuation rate.
+- Animate occupants, open exit labels, playback controls, and completion behavior.
+- Keep chart and animation code in top-level `index.html`.
+- Place screenshots or exported chart/result captures in `03_output/` only when generated.
+
+Check at completion:
+- The chart updates during playback and distinguishes both series.
+- Peak evacuation rate uses one-minute intervals.
+- 50%/90% timestamps match simulation threshold events.
+- Speed controls work and completion stops with final markers.
+- No-exit mode shows closed exits and disables playback controls.
+
+### Stage 5 - Polish, responsive behavior, and verification
+Complete cross-device and accessibility checks.
+
+- Apply desktop and mobile panel behavior and mobile tabs.
+- Add keyboard focus, visible status feedback, reduced motion, and 44x44 px controls.
+- Run normal, no-exit, boundary, clamping, and rounding validation cases.
+- Fix only issues revealed by validation and specification review.
+
+Check at completion:
+- Desktop and phone layouts match the intended hierarchy.
+- Keyboard navigation and status messages do not rely on color alone.
+- Reduced-motion playback limits dot movement.
+- The app excludes exports, saved settings, live feeds, and alternate floor-plan imports.
+- No unrelated files are added to the repository root.
