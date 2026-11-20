@@ -41,6 +41,7 @@
     :focus-visible {
       outline: 3px solid #1d4e68;
       outline-offset: 2px;
+      box-shadow: inset 0 0 0 1px var(--white);
     }
 
     .app-header {
@@ -82,7 +83,12 @@
       font-size: 0.875rem;
     }
 
-    body > input[type="radio"] {
+    .mobile-navigation {
+      display: none;
+    }
+
+    .mobile-navigation > input[type="radio"] {
+      display: none;
       position: absolute;
       width: 1px;
       height: 1px;
@@ -375,10 +381,15 @@
 
     .timeline {
       grid-column: 1 / -1;
+      width: 100%;
     }
 
-    .custom-door-wrap {
-      position: relative;
+    .timeline-control {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 4px;
+      color: var(--grey-600);
+      font-size: 0.78rem;
     }
 
     .door-menu {
@@ -397,16 +408,14 @@
 
     .door-menu-list {
       display: none;
-      position: absolute;
-      z-index: 20;
-      left: 0;
-      right: 0;
-      top: calc(100% + 6px);
+      position: static;
+      margin-top: 6px;
       padding: 6px;
       border: 1px solid var(--grey-400);
       border-radius: 6px;
       background: var(--white);
       box-shadow: var(--shadow);
+      gap: 8px;
     }
 
     .door-menu.open .door-menu-list {
@@ -449,10 +458,11 @@
       border-radius: 6px;
       background: var(--white);
       box-shadow: var(--shadow);
+      gap: 8px;
     }
 
     .custom-door-wrap {
-      position: static;
+      position: relative;
     }
 
     .custom-door-wrap.open .custom-door-panel {
@@ -476,6 +486,15 @@
       min-height: 20px;
       color: var(--grey-600);
       font-size: 0.78rem;
+      line-height: 1.4;
+    }
+
+    .floor-status {
+      margin: 0 4px 8px;
+      padding: 8px;
+      border-left: 4px solid var(--danger);
+      border-radius: 4px;
+      background: #fff7f7;
     }
 
     .status-message.error {
@@ -583,12 +602,11 @@
 
     .obstacle-menu-list {
       display: none;
-      position: absolute;
-      z-index: 15;
-      left: 0;
-      top: calc(100% + 6px);
+      position: static;
+      margin-top: 6px;
       padding: 6px;
       box-shadow: var(--shadow);
+      gap: 8px;
     }
 
     .obstacle-menu.open .obstacle-menu-list {
@@ -606,6 +624,17 @@
 
     .obstacle-menu-list label:hover {
       background: var(--grey-100);
+    }
+
+    .statistics-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .card.collapsed > .inputs-body,
+    .card.collapsed > .floor-body,
+    .card.collapsed > .outputs-body {
+      display: none;
     }
 
     @media (max-width: 980px) {
@@ -626,17 +655,24 @@
 
       .status { display: none; }
 
+      .mobile-navigation {
+        display: block;
+      }
+
       .tab-controls {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
         position: sticky;
         top: 0;
         z-index: 5;
         background: var(--white);
         border-bottom: 1px solid var(--grey-200);
+        padding: 4px 8px;
       }
 
-      .tab-controls input {
+      .mobile-navigation > input[type="radio"] {
+        display: block;
         position: absolute;
         opacity: 0;
         pointer-events: none;
@@ -646,42 +682,51 @@
         min-height: 48px;
         display: grid;
         place-items: center;
-        border-bottom: 3px solid transparent;
+        border: 1px solid transparent;
+        border-radius: 6px;
         color: var(--grey-600);
         font-size: 0.78rem;
-        cursor: default;
+        cursor: pointer;
       }
 
       #tab-inputs:checked ~ .tab-controls label[for="tab-inputs"],
       #tab-floor:checked ~ .tab-controls label[for="tab-floor"],
       #tab-chart:checked ~ .tab-controls label[for="tab-chart"],
       #tab-stats:checked ~ .tab-controls label[for="tab-stats"] {
-        border-bottom-color: #789baa;
+        border-color: #789baa;
+        background: var(--light);
         color: var(--ink);
         font-weight: 800;
+      }
+
+      #tab-inputs:focus-visible ~ .tab-controls label[for="tab-inputs"],
+      #tab-floor:focus-visible ~ .tab-controls label[for="tab-floor"],
+      #tab-chart:focus-visible ~ .tab-controls label[for="tab-chart"],
+      #tab-stats:focus-visible ~ .tab-controls label[for="tab-stats"] {
+        outline: 3px solid #1d4e68;
+        outline-offset: 1px;
+        box-shadow: inset 0 0 0 1px var(--white);
       }
 
       .workspace {
         display: block;
         min-height: auto;
-        padding: 10px;
+        padding: 8px;
       }
 
-      #tab-inputs:checked ~ .workspace .inputs-card,
-      #tab-floor:checked ~ .workspace .floor-card,
-      #tab-chart:checked ~ .workspace .outputs-card,
-      #tab-stats:checked ~ .workspace .outputs-card {
+      .workspace > .card {
+        display: none;
+      }
+
+      .workspace[data-mobile-tab="inputs"] .inputs-card,
+      .workspace[data-mobile-tab="floor"] .floor-card,
+      .workspace[data-mobile-tab="chart"] .outputs-card,
+      .workspace[data-mobile-tab="stats"] .outputs-card {
         display: block;
       }
 
-      #tab-inputs:checked ~ .workspace .floor-card,
-      #tab-inputs:checked ~ .workspace .outputs-card,
-      #tab-floor:checked ~ .workspace .inputs-card,
-      #tab-floor:checked ~ .workspace .outputs-card,
-      #tab-chart:checked ~ .workspace .inputs-card,
-      #tab-chart:checked ~ .workspace .floor-card,
-      #tab-stats:checked ~ .workspace .inputs-card,
-      #tab-stats:checked ~ .workspace .floor-card {
+      .workspace[data-mobile-tab="chart"] .statistics-panel,
+      .workspace[data-mobile-tab="stats"] .chart-card {
         display: none;
       }
 
@@ -691,11 +736,36 @@
       }
 
       .floor-body {
-        min-height: 520px;
+        min-height: 0;
+        padding: 8px;
       }
 
       .floor-plan {
-        min-height: 496px;
+        display: block;
+        height: auto;
+        min-height: 0;
+      }
+
+      .custom-door-wrap {
+        position: static;
+      }
+
+      .custom-door-panel {
+        position: static;
+        width: 100%;
+        margin-top: 4px;
+        box-shadow: none;
+      }
+
+      .inputs-body,
+      .outputs-body {
+        padding: 12px 8px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .occupant {
+        transition: none;
       }
     }
   </style>
@@ -709,25 +779,26 @@
     <div class="status">Marriott Center planning model</div>
   </header>
 
-  <input id="tab-inputs" type="radio" name="mobile-tab" checked>
-  <input id="tab-floor" type="radio" name="mobile-tab">
-  <input id="tab-chart" type="radio" name="mobile-tab">
-  <input id="tab-stats" type="radio" name="mobile-tab">
+  <div class="mobile-navigation" role="radiogroup" aria-label="Mobile sections">
+    <input id="tab-inputs" type="radio" name="mobile-tab" aria-label="Inputs section" aria-controls="inputs-panel" checked>
+    <input id="tab-floor" type="radio" name="mobile-tab" aria-label="Floor Plan section" aria-controls="floor-panel">
+    <input id="tab-chart" type="radio" name="mobile-tab" aria-label="Chart section" aria-controls="outputs-panel">
+    <input id="tab-stats" type="radio" name="mobile-tab" aria-label="Statistics section" aria-controls="outputs-panel">
+    <div class="tab-controls">
+      <label for="tab-inputs" aria-hidden="true">Inputs</label>
+      <label for="tab-floor" aria-hidden="true">Floor Plan</label>
+      <label for="tab-chart" aria-hidden="true">Chart</label>
+      <label for="tab-stats" aria-hidden="true">Statistics</label>
+    </div>
+  </div>
 
-  <nav class="tab-controls" aria-label="Mobile sections">
-    <label for="tab-inputs">Inputs</label>
-    <label for="tab-floor">Floor Plan</label>
-    <label for="tab-chart">Chart</label>
-    <label for="tab-stats">Statistics</label>
-  </nav>
-
-  <main class="workspace">
-    <section class="card inputs-card" aria-labelledby="inputs-title">
+  <main class="workspace" data-mobile-tab="inputs">
+    <section class="card inputs-card" id="inputs-panel" aria-labelledby="inputs-title">
       <div class="card-header">
         <h2 id="inputs-title">Scenario inputs</h2>
-        <button class="collapse-button" type="button" aria-label="Collapse scenario inputs" title="Collapse panel">−</button>
+        <button class="collapse-button" type="button" aria-label="Collapse scenario inputs" aria-controls="inputs-body" aria-expanded="true" title="Collapse panel">−</button>
       </div>
-      <div class="inputs-body">
+      <div class="inputs-body" id="inputs-body">
         <div class="field">
           <label for="occupancy">Occupancy</label>
           <div class="occupancy-row">
@@ -740,17 +811,17 @@
         <div class="field">
           <label for="door-preset">Door availability</label>
           <div class="door-menu" id="door-preset">
-            <button class="door-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+            <button class="door-menu-trigger" type="button" aria-haspopup="menu" aria-controls="door-menu-list" aria-expanded="false">
               All doors available <span aria-hidden="true">▾</span>
             </button>
-            <div class="door-menu-list" role="menu">
+            <div class="door-menu-list" id="door-menu-list" role="menu">
               <button class="door-option" type="button" role="menuitem">All doors available</button>
               <button class="door-option" type="button" role="menuitem">Exit doors only</button>
               <div class="custom-door-wrap">
-                <button class="custom-door-trigger" type="button" aria-haspopup="true">
+                <button class="custom-door-trigger" type="button" aria-haspopup="true" aria-controls="custom-door-panel" aria-expanded="false">
                   <span>Custom door selection</span><span aria-hidden="true">→</span>
                 </button>
-                <div class="custom-door-panel" role="group" aria-label="Choose exit door groups">
+                <div class="custom-door-panel" id="custom-door-panel" role="group" aria-label="Choose exit door groups">
                   <label><input type="checkbox" checked> North</label>
                   <label><input type="checkbox" checked> South</label>
                   <label><input type="checkbox" checked> East</label>
@@ -765,10 +836,10 @@
         <div class="field">
           <label for="obstacles">Obstacle scenario</label>
           <div class="obstacle-menu" id="obstacles">
-            <button class="obstacle-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+            <button class="obstacle-menu-trigger" type="button" aria-haspopup="menu" aria-controls="obstacle-menu-list" aria-expanded="false">
               No additional obstacles <span aria-hidden="true">▾</span>
             </button>
-            <div class="obstacle-menu-list" role="group" aria-label="Obstacle scenarios">
+            <div class="obstacle-menu-list" id="obstacle-menu-list" role="group" aria-label="Obstacle scenarios">
               <label><input type="checkbox" value="none" checked> No additional obstacles</label>
               <label><input type="checkbox" value="aisle"> Aisle restrictions</label>
               <label><input type="checkbox" value="seats"> Rows of seats</label>
@@ -786,12 +857,13 @@
       </div>
     </section>
 
-    <section class="card floor-card" aria-labelledby="floor-title">
+    <section class="card floor-card" id="floor-panel" aria-labelledby="floor-title">
       <div class="card-header">
         <h2 id="floor-title">Marriott Center floor plan</h2>
-        <button class="collapse-button" type="button" aria-label="Collapse floor plan" title="Collapse panel">−</button>
+        <button class="collapse-button" type="button" aria-label="Collapse floor plan" aria-controls="floor-body" aria-expanded="true" title="Collapse panel">−</button>
       </div>
-      <div class="floor-body">
+      <div class="floor-body" id="floor-body">
+        <p id="floor-status" class="status-message error" role="alert" hidden></p>
         <svg class="floor-plan" viewBox="0 0 760 560" role="img" aria-label="Marriott Center floor plan with rounded outline, central court, blue seating sections, aisles, perimeter hallway, and corner exits">
           <path d="M110 46 H650 C702 46 730 88 730 145 V415 C730 472 702 514 650 514 H110 C58 514 30 472 30 415 V145 C30 88 58 46 110 46 Z"
             fill="#f7f9fa" stroke="#8e989d" stroke-width="8"/>
@@ -896,25 +968,53 @@
             <circle class="occupant" cx="640" cy="340" r="5"/>
           </g>
         </svg>
+        <div class="animation-controls" aria-label="Animation controls">
+          <button id="play-button" type="button">Play</button>
+          <button id="pause-button" type="button">Pause</button>
+          <button id="animation-reset-button" type="button">Reset</button>
+          <select id="animation-speed" aria-label="Animation speed">
+            <option value="5">5x</option>
+            <option value="10">10x</option>
+            <option value="20">20x</option>
+          </select>
+          <div class="timeline-control">
+            <label for="animation-timeline">Timeline</label>
+            <input id="animation-timeline" class="timeline" type="range" min="0" max="1000" value="0" aria-label="Timeline scrubber" aria-valuetext="00:00" disabled>
+          </div>
+          <div class="progress-readout" aria-label="Evacuation progress">
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="0 percent evacuated">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-labels" aria-hidden="true">
+              <span>0%</span>
+              <span>25%</span>
+              <span>50%</span>
+              <span>75%</span>
+              <span>100%</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="card outputs-card" aria-labelledby="outputs-title">
+    <section class="card outputs-card" id="outputs-panel" aria-labelledby="outputs-title">
       <div class="card-header">
         <h2 id="outputs-title">Evacuation results</h2>
-        <button class="collapse-button" type="button" aria-label="Collapse evacuation results" title="Collapse panel">−</button>
+        <button class="collapse-button" type="button" aria-label="Collapse evacuation results" aria-controls="outputs-body" aria-expanded="true" title="Collapse panel">−</button>
       </div>
-      <div class="outputs-body">
-        <div class="result-grid" aria-label="Evacuation times">
-          <div class="result"><strong id="total-time">--:--</strong><span>Total</span></div>
-          <div class="result"><strong id="time-50">--:--</strong><span>50% evacuated</span></div>
-          <div class="result"><strong id="time-90">--:--</strong><span>90% evacuated</span></div>
-        </div>
+      <div class="outputs-body" id="outputs-body">
+        <div class="statistics-panel">
+          <div class="result-grid" aria-label="Evacuation times">
+            <div class="result"><strong id="total-time">--:--</strong><span>Total</span></div>
+            <div class="result"><strong id="time-50">--:--</strong><span>50% evacuated</span></div>
+            <div class="result"><strong id="time-90">--:--</strong><span>90% evacuated</span></div>
+          </div>
 
-        <div class="summary-grid" aria-label="Evacuation summary">
-          <div class="summary"><strong id="open-exit-count">4</strong><span>Open exits</span></div>
-          <div class="summary"><strong id="door-capacity">576</strong><span>People/minute</span></div>
-          <div class="summary"><strong id="peak-rate">--</strong><span>Peak people/minute</span></div>
+          <div class="summary-grid" aria-label="Evacuation summary">
+            <div class="summary"><strong id="open-exit-count">4</strong><span>Open exits</span></div>
+            <div class="summary"><strong id="door-capacity">576</strong><span>People/minute</span></div>
+            <div class="summary"><strong id="peak-rate">--</strong><span>Peak people/minute</span></div>
+          </div>
         </div>
 
         <div class="chart-card">
@@ -933,28 +1033,6 @@
           </div>
         </div>
 
-        <div class="animation-controls" aria-label="Animation controls">
-          <button id="play-button" type="button">Play</button>
-          <button id="pause-button" type="button">Pause</button>
-          <button id="animation-reset-button" type="button">Reset</button>
-          <select id="animation-speed" aria-label="Animation speed">
-            <option value="5">5x</option>
-            <option value="10">10x</option>
-            <option value="20">20x</option>
-          </select>
-          <div class="progress-readout" aria-label="Evacuation progress">
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="0 percent evacuated">
-              <div class="progress-fill" id="progress-fill"></div>
-            </div>
-            <div class="progress-labels" aria-hidden="true">
-              <span>0%</span>
-              <span>25%</span>
-              <span>50%</span>
-              <span>75%</span>
-              <span>100%</span>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   </main>
@@ -976,7 +1054,9 @@
     const resetButton = document.querySelector("#reset-button");
     const inputStatus = document.querySelector("#input-status");
     const outputsCard = document.querySelector(".outputs-card");
-    const animationButtons = document.querySelectorAll(".animation-controls button, .animation-controls select");
+    const floorCard = document.querySelector(".floor-card");
+    const workspace = document.querySelector(".workspace");
+    const animationButtons = document.querySelectorAll(".animation-controls button, .animation-controls select, .animation-controls input");
     const exitGroups = document.querySelectorAll(".exit-group");
 
     let openExitDirections = new Set(["north", "south", "east", "west"]);
@@ -1017,8 +1097,12 @@
     }
 
     function setStatus(message = "", type = "") {
-      inputStatus.textContent = message;
+      const prefix = type === "error" ? "[!] Error: " : type === "success" ? "[OK] " : "";
+      inputStatus.textContent = `${prefix}${message}`;
       inputStatus.className = `status-message${type ? ` ${type}` : ""}`;
+      const floorStatus = document.querySelector("#floor-status");
+      floorStatus.hidden = type !== "error";
+      floorStatus.textContent = type === "error" ? `${prefix}${message}` : "";
     }
 
     function clampOccupancy(value) {
@@ -1034,6 +1118,35 @@
       return clamped;
     }
 
+    function clearSimulationResults(totalTime = "--:--") {
+      currentSimulation = null;
+      stopPlayback();
+      document.querySelector("#total-time").textContent = totalTime;
+      document.querySelector("#time-50").textContent = "--:--";
+      document.querySelector("#time-90").textContent = "--:--";
+      document.querySelector("#open-exit-count").textContent = String(openExitDirections.size);
+      const aisleFactor = getSelectedObstacles().includes("aisle") ? 0.8 : 1;
+      const capacity = 24 * 6 * openExitDirections.size * aisleFactor;
+      document.querySelector("#door-capacity").textContent = String(Math.round(capacity));
+      document.querySelector("#peak-rate").textContent = "--";
+      document.querySelector("#evacuated-line").setAttribute("points", "");
+      document.querySelector("#remaining-line").setAttribute("points", "");
+      document.querySelector("#chart-marker").innerHTML = "";
+      document.querySelector("#chart-tooltip-target").innerHTML = "";
+      document.querySelector("#chart-tooltip").style.display = "none";
+      document.querySelector("#progress-fill").style.width = "0%";
+      const progressTrack = document.querySelector(".progress-track");
+      progressTrack.setAttribute("aria-valuenow", "0");
+      progressTrack.setAttribute("aria-label", "0 percent evacuated");
+      const timeline = document.querySelector("#animation-timeline");
+      timeline.value = "0";
+      timeline.setAttribute("aria-valuetext", "00:00");
+      animationButtons.forEach((control) => { control.disabled = true; });
+      resetOccupantDots();
+      outputsCard.classList.remove("results-dimmed");
+      floorCard.classList.remove("results-dimmed");
+    }
+
     function setOpenExits(directions) {
       openExitDirections = new Set(directions);
       exitGroups.forEach((group) => {
@@ -1043,12 +1156,16 @@
       const noExits = openExitDirections.size === 0;
       calculateButton.disabled = noExits;
       animationButtons.forEach((control) => {
-        control.disabled = noExits;
+        control.disabled = noExits || !currentSimulation;
       });
 
       if (noExits) {
+        clearSimulationResults("N/A");
         setStatus("No exit doors are open. Open at least one exit group to calculate.", "error");
       } else {
+        if (document.querySelector("#total-time").textContent === "N/A") {
+          clearSimulationResults();
+        }
         setStatus(`${openExitDirections.size} exit group${openExitDirections.size === 1 ? "" : "s"} open.`);
       }
     }
@@ -1101,8 +1218,18 @@
       { minX: 590, maxX: 682, minY: 290, maxY: 400 }
     ];
 
-    function sampleSeatPosition() {
-      const zone = seatingZones[Math.floor(Math.random() * seatingZones.length)];
+    const seatingZonesByExit = {
+      north: [0, 4],
+      east: [1, 6],
+      south: [3, 7],
+      west: [2, 5]
+    };
+
+    function sampleSeatPosition(direction) {
+      const zoneIndexes = direction ? seatingZonesByExit[direction] : null;
+      const zone = zoneIndexes
+        ? seatingZones[zoneIndexes[Math.floor(Math.random() * zoneIndexes.length)]]
+        : seatingZones[Math.floor(Math.random() * seatingZones.length)];
       return {
         x: zone.minX + Math.random() * (zone.maxX - zone.minX),
         y: zone.minY + Math.random() * (zone.maxY - zone.minY)
@@ -1177,9 +1304,22 @@
       const directions = [...openExitDirections];
       const people = [];
       const queues = new Map(directions.map((direction) => [direction, []]));
+      const allExitsOpen = ["north", "south", "east", "west"]
+        .every((direction) => openExitDirections.has(direction));
+      const assignedDirections = allExitsOpen
+        ? Array.from({ length: occupancy }, (_, index) => directions[index % directions.length])
+        : null;
+
+      if (assignedDirections) {
+        for (let index = assignedDirections.length - 1; index > 0; index -= 1) {
+          const swapIndex = Math.floor(Math.random() * (index + 1));
+          [assignedDirections[index], assignedDirections[swapIndex]] =
+            [assignedDirections[swapIndex], assignedDirections[index]];
+        }
+      }
 
       for (let occupant = 0; occupant < occupancy; occupant += 1) {
-        const start = sampleSeatPosition();
+        const start = sampleSeatPosition(assignedDirections ? assignedDirections[occupant] : null);
         const direction = directions.reduce((nearest, candidate) => {
           const nearestExit = exitCoordinates[nearest];
           const candidateExit = exitCoordinates[candidate];
@@ -1429,20 +1569,29 @@
       const currentTime = Math.max(0, Math.min(seconds, currentSimulation.totalSeconds));
       const evacuated = getSeriesAtTime(currentSimulation.timeSeries, currentTime).evacuated;
       const progress = evacuated / currentSimulation.occupancy;
+      const reduceMotion = window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const dots = [...document.querySelectorAll("#occupant-dots .occupant")];
 
       dots.forEach((dot) => {
         const person = currentSimulation.people[Number(dot.dataset.personIndex)];
         let position;
         if (currentTime < person.arrivalTime) {
-          position = getPositionOnRoute(person.route, currentTime / person.arrivalTime);
+          const routeProgress = currentTime / person.arrivalTime;
+          const visibleProgress = reduceMotion
+            ? Math.floor(routeProgress * 4) / 4
+            : routeProgress;
+          position = getPositionOnRoute(person.route, visibleProgress);
           dot.style.opacity = "1";
         } else if (currentTime < person.exitTime) {
           if (currentTime < person.serviceStart) {
             position = person.queuePosition;
           } else {
-            const serviceProgress =
+            const rawServiceProgress =
               (currentTime - person.serviceStart) / (person.exitTime - person.serviceStart);
+            const serviceProgress = reduceMotion
+              ? Math.round(rawServiceProgress * 2) / 2
+              : rawServiceProgress;
             const exit = exitCoordinates[person.direction];
             position = {
               x: person.queuePosition.x + (exit.x - person.queuePosition.x) * serviceProgress,
@@ -1464,6 +1613,9 @@
       const progressTrack = document.querySelector(".progress-track");
       progressTrack.setAttribute("aria-valuenow", String(Math.round(progressPercent)));
       progressTrack.setAttribute("aria-label", `${Math.round(progressPercent)} percent evacuated`);
+      const timeline = document.querySelector("#animation-timeline");
+      timeline.value = String(Math.round((currentTime / currentSimulation.totalSeconds) * 1000));
+      timeline.setAttribute("aria-valuetext", formatMMSS(currentTime));
       document.querySelector("#chart-marker").dataset.currentEvacuated = evacuated;
       document.querySelectorAll(".marker-50").forEach((marker) => {
         marker.style.display = currentTime >= currentSimulation.time50 ? "" : "none";
@@ -1522,6 +1674,7 @@
       doorMenuTrigger.setAttribute("aria-expanded", String(isOpen));
       if (!isOpen) {
         customDoorWrap.classList.remove("open");
+        customDoorTrigger.setAttribute("aria-expanded", "false");
       }
     });
 
@@ -1538,6 +1691,7 @@
         doorMenu.classList.remove("open");
         doorMenuTrigger.setAttribute("aria-expanded", "false");
         customDoorWrap.classList.remove("open");
+        customDoorTrigger.setAttribute("aria-expanded", "false");
       });
     });
 
@@ -1593,33 +1747,23 @@
       });
       updateObstacleSelection();
       setOpenExits(["north", "south", "east", "west"]);
-      currentSimulation = null;
-      document.querySelector("#total-time").textContent = "--:--";
-      document.querySelector("#time-50").textContent = "--:--";
-      document.querySelector("#time-90").textContent = "--:--";
-      document.querySelector("#open-exit-count").textContent = "4";
-      document.querySelector("#door-capacity").textContent = "576";
-      document.querySelector("#peak-rate").textContent = "--";
-      stopPlayback();
-      document.querySelector("#evacuated-line").setAttribute("points", "");
-      document.querySelector("#remaining-line").setAttribute("points", "");
-      document.querySelector("#chart-marker").innerHTML = "";
-      document.querySelector("#progress-fill").style.width = "0%";
-      document.querySelector(".progress-track").setAttribute("aria-valuenow", "0");
-      resetOccupantDots();
-      outputsCard.classList.remove("results-dimmed");
+      clearSimulationResults();
       setStatus("Default scenario restored.", "success");
     });
 
     calculateButton.addEventListener("click", () => {
       if (openExitDirections.size === 0) return;
       calculateButton.disabled = true;
+      stopPlayback(false);
+      animationButtons.forEach((control) => { control.disabled = true; });
       outputsCard.classList.add("results-dimmed");
+      floorCard.classList.add("results-dimmed");
       setStatus("Calculating…");
       window.setTimeout(() => {
         currentSimulation = runEvacuationSimulation();
         if (!currentSimulation) {
           outputsCard.classList.remove("results-dimmed");
+          floorCard.classList.remove("results-dimmed");
           calculateButton.disabled = false;
           setStatus("Evacuation time is undefined.", "error");
           return;
@@ -1635,9 +1779,11 @@
         renderChart(currentSimulation);
         createOccupantDots(currentSimulation);
         resetOccupantDots();
+        animationButtons.forEach((control) => { control.disabled = false; });
         updateAnimation(0);
 
         outputsCard.classList.remove("results-dimmed");
+        floorCard.classList.remove("results-dimmed");
         calculateButton.disabled = false;
         setStatus("Evacuation animation started.", "success");
         startPlayback();
@@ -1664,11 +1810,70 @@
       }
     });
 
+    document.querySelector("#animation-timeline").addEventListener("input", (event) => {
+      if (!currentSimulation) return;
+      stopPlayback(false);
+      playbackSeconds =
+        (Number(event.target.value) / 1000) * currentSimulation.totalSeconds;
+      updateAnimation(playbackSeconds);
+      if (playbackSeconds >= currentSimulation.totalSeconds) {
+        setStatus("Evacuation complete.", "success");
+      }
+    });
+
+    document.querySelectorAll(".collapse-button").forEach((button) => {
+      const card = button.closest(".card");
+      const content = card.querySelector(".inputs-body, .floor-body, .outputs-body");
+      const cardTitle = card.querySelector("h2").textContent.trim().toLowerCase();
+      button.addEventListener("click", () => {
+        const collapsed = card.classList.toggle("collapsed");
+        content.hidden = collapsed;
+        button.textContent = collapsed ? "+" : "−";
+        button.setAttribute("aria-expanded", String(!collapsed));
+        button.setAttribute("aria-label", `${collapsed ? "Expand" : "Collapse"} ${cardTitle}`);
+        button.title = `${collapsed ? "Expand" : "Collapse"} panel`;
+      });
+    });
+
+    const mobileTabs = [...document.querySelectorAll('input[name="mobile-tab"]')];
+    mobileTabs.forEach((tab) => {
+      tab.addEventListener("change", () => {
+        workspace.dataset.mobileTab = tab.id.replace("tab-", "");
+      });
+    });
+
+    let touchStart = null;
+    workspace.addEventListener("touchstart", (event) => {
+      if (!window.matchMedia("(max-width: 720px)").matches || event.touches.length !== 1) return;
+      const target = event.target instanceof Element ? event.target : null;
+      if (target && target.closest("button, input, select, textarea, a, .door-menu-list, .obstacle-menu-list")) {
+        touchStart = null;
+        return;
+      }
+      touchStart = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY
+      };
+    }, { passive: true });
+
+    workspace.addEventListener("touchend", (event) => {
+      if (!touchStart || !window.matchMedia("(max-width: 720px)").matches) return;
+      const deltaX = event.changedTouches[0].clientX - touchStart.x;
+      const deltaY = event.changedTouches[0].clientY - touchStart.y;
+      touchStart = null;
+      if (Math.abs(deltaX) < 60 || Math.abs(deltaX) < Math.abs(deltaY) * 1.25) return;
+
+      const activeIndex = mobileTabs.findIndex((tab) => tab.checked);
+      const nextTab = mobileTabs[activeIndex + (deltaX < 0 ? 1 : -1)];
+      if (nextTab) nextTab.click();
+    }, { passive: true });
+
     document.addEventListener("click", (event) => {
       if (!doorMenu.contains(event.target)) {
         doorMenu.classList.remove("open");
         customDoorWrap.classList.remove("open");
         doorMenuTrigger.setAttribute("aria-expanded", "false");
+        customDoorTrigger.setAttribute("aria-expanded", "false");
       }
       if (!obstacleMenu.contains(event.target)) {
         obstacleMenu.classList.remove("open");
@@ -1682,6 +1887,7 @@
         customDoorWrap.classList.remove("open");
         obstacleMenu.classList.remove("open");
         doorMenuTrigger.setAttribute("aria-expanded", "false");
+        customDoorTrigger.setAttribute("aria-expanded", "false");
         obstacleMenuTrigger.setAttribute("aria-expanded", "false");
         doorMenuTrigger.focus();
       }
