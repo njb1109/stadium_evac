@@ -1,7 +1,7 @@
 ## Stadium Evacuation
 
 ## Purpose
-A planning and training app for facilities managers, building operators, event staff, emergency responders, and planning personnel. It models the Marriott Center floor plan and estimates the total evacuation time based on occupant count and inputs that materially affect walking or door flow. It is intended only for planning and training scenarios, not for live operational or real-time incident decision support. Results are estimates and do not replace approved emergency procedures or a certified fire/life-safety analysis.
+A planning and training app for facilities managers, building operators, event staff, emergency responders, and planning personnel. It models the Marriott Center floor plan and estimates total evacuation time, 50% evacuation time, and 90% evacuation time based on occupant count and inputs that materially affect walking or door flow. It is intended only for planning and training scenarios, not for live operational or real-time incident decision support. Results are estimates and do not replace approved emergency procedures or a certified fire/life-safety analysis.
 
 ## Inputs - every value the user enters, with units, ranges, defaults, and the control used to enter it
 - Occupancy: user-entered current occupant count for the Marriott Center, from 100 to 2000 whole people, with a default of 500 people. Use a number entry and slider. Values outside the range are clamped to the nearest limit.
@@ -32,10 +32,17 @@ A planning and training app for facilities managers, building operators, event s
 - Time to evacuate is the time in seconds until the final occupant clears the exit route. If no exit doors are open, evacuation time is undefined and the app displays an error.
 - Door-flow time is not calculated by a separate per-occupant average. Occupants are processed simultaneously according to arrival time and exit capacity.
 - Display the final total evacuation time rounded up to the nearest second.
+- Record timestamps when the number of occupants remaining reaches 50% and 10% of the initial occupancy. The 50% timestamp is the time at which at least 50% of occupants have evacuated; the 90% timestamp is the time at which at least 90% of occupants have evacuated.
+- Round the displayed 50% and 90% timestamps up to the nearest second.
+- Calculate occupants remaining over time as `N - cumulative occupants evacuated`, for each point in the simulation.
 
 ## Outputs - what the app shows: numbers with units, tables, plots, and diagrams
 - `MM:SS` total evacuation time. The time is calculated and updated only when the user presses Calculate.
+- `MM:SS` timestamp for 50% evacuation.
+- `MM:SS` timestamp for 90% evacuation.
 - Evacuation progress line chart with elapsed time in minutes on the horizontal axis and people evacuated on the vertical axis. Sample and update the cumulative line at one-minute intervals.
+- Remaining occupants line chart or line on the same chart with elapsed time in minutes on the horizontal axis and occupants remaining on the vertical axis. Update it live during the animation and sample it at one-minute intervals.
+- Clearly distinguish the people-evacuated and people-remaining lines using separate labels and line styles.
 - Chart interaction:
   - Update the line live during animation.
   - Include hover tooltips and axis gridlines.
@@ -91,6 +98,7 @@ A planning and training app for facilities managers, building operators, event s
   - Door clearance time for 500 people at 576 people/minute: 500 / 576 x 60 = 52.083 seconds.
   - Queue model assumption: after occupants arrive, the exits process them simultaneously at the summed capacity.
   - Expected total evacuation time: 89.445 + 52.083 = 141.528 seconds, rounded up to the nearest second = 142 seconds (02:22).
+  - With each occupant's route and door-flow queue simulated consistently across the fixed 200-ft validation routes, the 50% timestamp occurs when 250 occupants are evacuated and the 90% timestamp occurs when 450 occupants are evacuated. Exact timestamps depend on the arrival and queue simulation and must be recorded from the implemented simulation rather than inferred from total time alone.
 - No-exit case:
   - Inputs: 500 occupants; all exit doors closed.
   - Expected result: evacuation time is undefined, the app displays an error, and the animation remains stopped at the start with all exits visibly closed.
